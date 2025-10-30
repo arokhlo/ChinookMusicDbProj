@@ -43,6 +43,13 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ['username', 'first_name', 'last_name', 'email']
     actions = ['assign_admin_group', 'assign_superuser_group', 'assign_staff_group', 'assign_regular_group']
     
+    def get_queryset(self, request):
+        """
+        Store the current user for use in other methods.
+        """
+        self._current_user = request.user
+        return super().get_queryset(request)
+    
     def group_display(self, obj):
         groups = obj.groups.all()
         if groups:
@@ -51,8 +58,12 @@ class CustomUserAdmin(UserAdmin):
     group_display.short_description = 'Groups'
     
     def user_actions(self, obj):
-        if obj == self.user:  # Prevent admin from modifying their own permissions
-            return "Current User"
+        """
+        Custom method to display user actions in admin list display.
+        """
+        # Check if we have the current user and prevent self-modification
+        if hasattr(self, '_current_user') and obj == self._current_user:
+            return "Current User - No actions available"
         
         links = []
         if not obj.is_superuser:
