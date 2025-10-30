@@ -121,7 +121,7 @@ body {
 
 /* ===== STATS CARDS ===== */
 .stats-card {
-    border: none;
+    color: #ffffff !important;
     border-radius: 20px;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -157,7 +157,16 @@ body {
     font-size: 2.5rem !important;
     font-weight: bold;
     margin-bottom: 0.5rem;
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
+
+
+
+
+
+
+
 
 .stats-card .card-body {
     padding: 1rem 1rem !important;
@@ -264,6 +273,11 @@ body {
     transition: all 0.3s ease;
     border: 2px solid rgba(255,255,255,0.3);
     text-shadow: none;
+}
+
+.stats-card .card-body,
+.stats-card .card-body * {
+    color: inherit !important;
 }
 
 .explore-btn.btn-light {
