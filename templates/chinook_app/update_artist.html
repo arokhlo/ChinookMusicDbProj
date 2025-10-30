@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Update Artist{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h2>Update Artist</h2>
+        
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="artist_id" class="form-label">Select Artist to Update:</label>
+                        <select id="artist_id" name="artist_id" class="form-control" required>
+                            <option value="">-- Select an Artist --</option>
+                            {% for artist in artists %}
+                            <option value="{{ artist.ArtistId }}" {% if selected_artist and selected_artist.ArtistId == artist.ArtistId %}selected{% endif %}>
+                                {{ artist.Name }} (ID: {{ artist.ArtistId }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <button type="submit" name="select_artist" class="btn btn-primary">Select Artist</button>
+                </form>
+
+                {% if selected_artist %}
+                <hr>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="artist_id" value="{{ selected_artist.ArtistId }}">
+                    
+                    <div class="mb-3">
+                        <label for="new_name" class="form-label">New Name for '{{ selected_artist.Name }}':</label>
+                        <input type="text" id="new_name" name="new_name" value="{{ selected_artist.Name }}" class="form-control" required>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" name="update_artist" class="btn btn-warning">Update Artist</button>
+                        <a href="{% url 'update_artist' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Add Album{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h2>Add New Album</h2>
+        
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="id_ArtistId" class="form-label">Select Artist:</label>
+                        {{ form.ArtistId }}
+                        {% if form.ArtistId.errors %}
+                            <div class="text-danger">
+                                {{ form.ArtistId.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_Title" class="form-label">Album Title:</label>
+                        {{ form.Title }}
+                        {% if form.Title.errors %}
+                            <div class="text-danger">
+                                {{ form.Title.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">Add Album</button>
+                        <a href="{% url 'all_albums' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f8f9fa; padding: 20px; border-radius: 0 0 10px 10px; }
+        .user-info { background: white; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #667eea; }
+        .btn { display: inline-block; padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+        .footer { text-align: center; margin-top: 20px; padding: 20px; color: #666; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 New User Registration</h1>
+            <p>Chinook Music Database</p>
+        </div>
+        
+        <div class="content">
+            <p>Hello {{ admin_username }},</p>
+            
+            <p>A new user has registered on the Chinook Music Database:</p>
+            
+            <div class="user-info">
+                <h3>New User Details:</h3>
+                <p><strong>Username:</strong> {{ new_user.username }}</p>
+                <p><strong>Email:</strong> {{ new_user.email|default:"Not provided" }}</p>
+                <p><strong>Registration Date:</strong> {{ registration_date }}</p>
+                <p><strong>Status:</strong> Awaiting group assignment</p>
+            </div>
+            
+            <p>Please log in to the admin panel to assign this user to the appropriate group:</p>
+            
+            <a href="{{ admin_url }}" class="btn">Go to Admin Panel</a>
+            
+            <p><strong>Available Groups:</strong></p>
+            <ul>
+                <li><strong>Admin:</strong> Full permissions, can manage all users</li>
+                <li><strong>Superuser:</strong> Full permissions but cannot modify Admin users</li>
+                <li><strong>Staff:</strong> Can perform CRUD operations, cannot access Management menu</li>
+                <li><strong>Regular:</strong> Can only add content and manage their profile</li>
+            </ul>
+            
+            <p>Thank you for managing the Chinook Music Database!</p>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated notification from Chinook Music Database.</p>
+            <p>Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

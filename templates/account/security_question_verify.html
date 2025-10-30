@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Answer Security Questions</h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Please answer the following security questions:</p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% for question in security_questions %}
+                        <div class="mb-3">
+                            <label class="form-label">{{ question.question }}</label>
+                            <input type="text" name="answer_{{ forloop.counter }}" 
+                                   class="form-control" placeholder="Your answer" required>
+                        </div>
+                        {% endfor %}
+                        
+                        <button type="submit" class="btn btn-primary w-100">Verify Answers</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
