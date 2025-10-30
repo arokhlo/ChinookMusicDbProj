@@ -1,17 +1,10 @@
-
-
-
-
-
-
-
-
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
 
 {% block title %}My Profile - Chinook Music Database{% endblock %}
 
 {% block content %}
+
 <div class="row justify-content-center">
     <div class="col-md-10">
         <div class="card border-0 shadow">
@@ -173,18 +166,16 @@
                 </div>
             </div>
 
-
-<div class="card-footer bg-light">
-    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-        <a href="{% url 'home' %}" class="btn btn-outline-secondary me-md-2">
-            <i class="fas fa-arrow-left me-1"></i>Back to Home
-        </a>
-        <a href="{% url 'account_change_password' %}" class="btn btn-outline-primary">
-            <i class="fas fa-key me-1"></i>Change Password
-        </a>
-    </div>
-</div>
-
+            <div class="card-footer bg-light">
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{% url 'home' %}" class="btn btn-outline-secondary me-md-2">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Home
+                    </a>
+                    <a href="{% url 'change_password_with_security' %}" class="btn btn-warning">
+                        <i class="fas fa-key me-1"></i>Change Password
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>

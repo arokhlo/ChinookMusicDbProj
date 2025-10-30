@@ -8,6 +8,11 @@ urlpatterns = [
     path('accounts/password/reset/', 
          views.CustomPasswordResetView.as_view(), 
          name='account_reset_password'),
+path('accounts/password/change/', views.change_password_with_security_questions, name='account_change_password'),
+    
+    # Or add it as a new endpoint (recommended for testing)
+    path('accounts/change-password-security/', views.change_password_with_security_questions, name='change_password_with_security'),
+
     
     # ===== SECURITY QUESTION PASSWORD RESET FLOW =====
     path('accounts/password/reset/security-questions/', 
@@ -64,4 +69,10 @@ urlpatterns = [
     path('album/<int:album_id>/delete/', views.delete_album_frontend, name='delete_album_frontend'),
     path('artist/<int:artist_id>/delete/', views.delete_artist_frontend, name='delete_artist_frontend'),
 
+    path('accounts/change-password/', views.change_password_with_security_questions, name='change_password_with_security'),
+
+    path('accounts/password/change/', views.change_password_with_security_questions, name='account_change_password'),
+    
+    # Keep your custom URL for testing
+    path('accounts/change-password-security/', views.change_password_with_security_questions, name='change_password_with_security'),
 ]
