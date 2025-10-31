@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import path, reverse
 from django.utils.html import format_html
+from django.core.exceptions import PermissionDenied
 from .models import UserProfile, Artist, Album, Track, Review, SecurityQuestion
 
 
@@ -31,7 +32,6 @@ class SecurityQuestionInline(admin.StackedInline):
         'question_3', 'answer_3',
         'question_4', 'answer_4',
         'question_5', 'answer_5',
-        'custom_question_text'
     ]
     extra = 0
 
@@ -42,6 +42,77 @@ class CustomUserAdmin(UserAdmin):
     list_filter = ['is_staff', 'is_superuser', 'is_active', 'groups', 'date_joined']
     search_fields = ['username', 'first_name', 'last_name', 'email']
     actions = ['assign_admin_group', 'assign_superuser_group', 'assign_staff_group', 'assign_regular_group']
+    
+    def has_module_permission(self, request):
+        """
+        Check if user has permission to access this admin module
+        """
+        if not request.user.is_authenticated:
+            return False
+        
+        # Superuser group members cannot access admin
+        if request.user.groups.filter(name='Superuser').exists():
+            return False
+        
+        # Only allow Admin group and actual Django superusers
+        return (request.user.groups.filter(name='Admin').exists() or 
+                request.user.is_superuser)
+    
+    def has_view_permission(self, request, obj=None):
+        """
+        Check if user has permission to view users
+        """
+        if not request.user.is_authenticated:
+            return False
+        
+        # Superuser group members cannot access admin
+        if request.user.groups.filter(name='Superuser').exists():
+            return False
+        
+        return (request.user.groups.filter(name='Admin').exists() or 
+                request.user.is_superuser)
+    
+    def has_change_permission(self, request, obj=None):
+        """
+        Check if user has permission to change users
+        """
+        if not request.user.is_authenticated:
+            return False
+        
+        # Superuser group members cannot access admin
+        if request.user.groups.filter(name='Superuser').exists():
+            return False
+        
+        return (request.user.groups.filter(name='Admin').exists() or 
+                request.user.is_superuser)
+    
+    def has_delete_permission(self, request, obj=None):
+        """
+        Check if user has permission to delete users
+        """
+        if not request.user.is_authenticated:
+            return False
+        
+        # Superuser group members cannot access admin
+        if request.user.groups.filter(name='Superuser').exists():
+            return False
+        
+        return (request.user.groups.filter(name='Admin').exists() or 
+                request.user.is_superuser)
+    
+    def has_add_permission(self, request):
+        """
+        Check if user has permission to add users
+        """
+        if not request.user.is_authenticated:
+            return False
+        
+        # Superuser group members cannot access admin
+        if request.user.groups.filter(name='Superuser').exists():
+            return False
+        
+        return (request.user.groups.filter(name='Admin').exists() or 
+                request.user.is_superuser)
     
     def get_queryset(self, request):
         """
@@ -88,6 +159,10 @@ class CustomUserAdmin(UserAdmin):
         return custom_urls + urls
     
     def assign_group_view(self, request, user_id, group_type):
+        # Check permission first
+        if not (request.user.groups.filter(name='Admin').exists() or request.user.is_superuser):
+            raise PermissionDenied
+        
         try:
             user = User.objects.get(id=user_id)
             target_user = request.user
@@ -140,6 +215,10 @@ class CustomUserAdmin(UserAdmin):
         return HttpResponseRedirect(reverse('admin:auth_user_changelist'))
     
     def assign_admin_group(self, request, queryset):
+        # Check permission
+        if not (request.user.groups.filter(name='Admin').exists() or request.user.is_superuser):
+            raise PermissionDenied
+        
         admin_group, created = Group.objects.get_or_create(name='Admin')
         for user in queryset:
             if user != request.user:  # Prevent self-modification
@@ -152,6 +231,10 @@ class CustomUserAdmin(UserAdmin):
     assign_admin_group.short_description = "Assign selected users to Admin group"
     
     def assign_superuser_group(self, request, queryset):
+        # Check permission
+        if not (request.user.groups.filter(name='Admin').exists() or request.user.is_superuser):
+            raise PermissionDenied
+        
         superuser_group, created = Group.objects.get_or_create(name='Superuser')
         for user in queryset:
             if user != request.user:
@@ -164,6 +247,10 @@ class CustomUserAdmin(UserAdmin):
     assign_superuser_group.short_description = "Assign selected users to Superuser group"
     
     def assign_staff_group(self, request, queryset):
+        # Check permission
+        if not (request.user.groups.filter(name='Admin').exists() or request.user.is_superuser):
+            raise PermissionDenied
+        
         staff_group, created = Group.objects.get_or_create(name='Staff')
         for user in queryset:
             if user != request.user:
@@ -176,6 +263,10 @@ class CustomUserAdmin(UserAdmin):
     assign_staff_group.short_description = "Assign selected users to Staff group"
     
     def assign_regular_group(self, request, queryset):
+        # Check permission
+        if not (request.user.groups.filter(name='Admin').exists() or request.user.is_superuser):
+            raise PermissionDenied
+        
         regular_group, created = Group.objects.get_or_create(name='Regular')
         for user in queryset:
             if user != request.user:
@@ -192,6 +283,21 @@ class CustomGroupAdmin(admin.ModelAdmin):
     list_display = ['name', 'user_count']
     filter_horizontal = ['permissions']
     
+    def has_module_permission(self, request):
+        """
+        Check if user has permission to access groups admin
+        """
+        if not request.user.is_authenticated:
+            return False
+        
+        # Superuser group members cannot access admin
+        if request.user.groups.filter(name='Superuser').exists():
+            return False
+        
+        # Only allow Admin group and actual Django superusers
+        return (request.user.groups.filter(name='Admin').exists() or 
+                request.user.is_superuser)
+    
     def user_count(self, obj):
         return obj.user_set.count()
     user_count.short_description = 'Number of Users'
@@ -202,8 +308,41 @@ admin.site.register(User, CustomUserAdmin)
 admin.site.register(Group, CustomGroupAdmin)
 
 
+# Add permission checks to all other admin models
+class BaseAdmin(admin.ModelAdmin):
+    """
+    Base admin class with permission checks for all models
+    """
+    def has_module_permission(self, request):
+        """
+        Check if user has permission to access this admin module
+        """
+        if not request.user.is_authenticated:
+            return False
+        
+        # Superuser group members cannot access admin
+        if request.user.groups.filter(name='Superuser').exists():
+            return False
+        
+        # Only allow Admin group and actual Django superusers
+        return (request.user.groups.filter(name='Admin').exists() or 
+                request.user.is_superuser)
+    
+    def has_view_permission(self, request, obj=None):
+        return self.has_module_permission(request)
+    
+    def has_change_permission(self, request, obj=None):
+        return self.has_module_permission(request)
+    
+    def has_delete_permission(self, request, obj=None):
+        return self.has_module_permission(request)
+    
+    def has_add_permission(self, request):
+        return self.has_module_permission(request)
+
+
 @admin.register(UserProfile)
-class UserProfileAdmin(admin.ModelAdmin):
+class UserProfileAdmin(BaseAdmin):
     list_display = ['user', 'location', 'birth_date']
     list_filter = ['location']
     search_fields = ['user__username', 'user__first_name', 'user__last_name', 'location', 'bio']
@@ -221,7 +360,7 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 
 @admin.register(SecurityQuestion)
-class SecurityQuestionAdmin(admin.ModelAdmin):
+class SecurityQuestionAdmin(BaseAdmin):
     list_display = ['user', 'question_1', 'question_2']
     list_filter = ['question_1', 'question_2', 'question_3']
     search_fields = ['user__username', 'user__email']
@@ -238,14 +377,13 @@ class SecurityQuestionAdmin(admin.ModelAdmin):
                 ('question_3', 'answer_3'),
                 ('question_4', 'answer_4'),
                 ('question_5', 'answer_5'),
-                'custom_question_text'
             )
         }),
     )
 
 
 @admin.register(Artist)
-class ArtistAdmin(admin.ModelAdmin):
+class ArtistAdmin(BaseAdmin):
     list_display = ['ArtistId', 'Name']
     list_filter = ['Name']
     search_fields = ['Name']
@@ -253,7 +391,7 @@ class ArtistAdmin(admin.ModelAdmin):
 
 
 @admin.register(Album)
-class AlbumAdmin(admin.ModelAdmin):
+class AlbumAdmin(BaseAdmin):
     list_display = ['AlbumId', 'Title', 'ArtistId']
     list_filter = ['ArtistId']
     search_fields = ['Title', 'ArtistId__Name']
@@ -262,7 +400,7 @@ class AlbumAdmin(admin.ModelAdmin):
 
 
 @admin.register(Track)
-class TrackAdmin(admin.ModelAdmin):
+class TrackAdmin(BaseAdmin):
     list_display = ['TrackId', 'Name', 'AlbumId', 'Composer', 'Milliseconds', 'UnitPrice']
     list_filter = ['AlbumId', 'GenreId', 'MediaTypeId']
     search_fields = ['Name', 'Composer', 'AlbumId__Title']
@@ -275,7 +413,7 @@ class TrackAdmin(admin.ModelAdmin):
 
 
 @admin.register(Review)
-class ReviewAdmin(admin.ModelAdmin):
+class ReviewAdmin(BaseAdmin):
     list_display = ['user', 'track', 'rating', 'created_at']
     list_filter = ['rating', 'created_at']
     search_fields = ['user__username', 'track__Name', 'comment']
