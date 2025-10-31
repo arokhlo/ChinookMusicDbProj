@@ -43,6 +43,12 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ['username', 'first_name', 'last_name', 'email']
     actions = ['assign_admin_group', 'assign_superuser_group', 'assign_staff_group', 'assign_regular_group']
     
+    def is_protected_user(self, obj):
+        """
+        Check if the user is protected (username is 'admin')
+        """
+        return obj.username.lower() == 'admin'
+    
     def has_module_permission(self, request):
         """
         Check if user has permission to access this admin module
@@ -69,6 +75,11 @@ class CustomUserAdmin(UserAdmin):
         if request.user.groups.filter(name='Superuser').exists():
             return False
         
+        # If viewing a specific user object, check if it's protected
+        if obj and self.is_protected_user(obj):
+            # No one can view the protected admin user
+            return False
+        
         return (request.user.groups.filter(name='Admin').exists() or 
                 request.user.is_superuser)
     
@@ -83,6 +94,11 @@ class CustomUserAdmin(UserAdmin):
         if request.user.groups.filter(name='Superuser').exists():
             return False
         
+        # If changing a specific user object, check if it's protected
+        if obj and self.is_protected_user(obj):
+            # No one can modify the protected admin user
+            return False
+        
         return (request.user.groups.filter(name='Admin').exists() or 
                 request.user.is_superuser)
     
@@ -95,6 +111,11 @@ class CustomUserAdmin(UserAdmin):
         
         # Superuser group members cannot access admin
         if request.user.groups.filter(name='Superuser').exists():
+            return False
+        
+        # If deleting a specific user object, check if it's protected
+        if obj and self.is_protected_user(obj):
+            # No one can delete the protected admin user
             return False
         
         return (request.user.groups.filter(name='Admin').exists() or 
@@ -116,10 +137,11 @@ class CustomUserAdmin(UserAdmin):
     
     def get_queryset(self, request):
         """
-        Store the current user for use in other methods.
+        Store the current user for use in other methods and filter out protected users
         """
         self._current_user = request.user
-        return super().get_queryset(request)
+        # Exclude protected admin user from queryset
+        return super().get_queryset(request).exclude(username__iexact='admin')
     
     def group_display(self, obj):
         groups = obj.groups.all()
@@ -135,6 +157,10 @@ class CustomUserAdmin(UserAdmin):
         # Check if we have the current user and prevent self-modification
         if hasattr(self, '_current_user') and obj == self._current_user:
             return "Current User - No actions available"
+        
+        # Don't show actions for protected admin user
+        if self.is_protected_user(obj):
+            return "Protected User - No actions available"
         
         links = []
         if not obj.is_superuser:
@@ -165,6 +191,12 @@ class CustomUserAdmin(UserAdmin):
         
         try:
             user = User.objects.get(id=user_id)
+            
+            # Prevent modifying protected admin user
+            if user.username.lower() == 'admin':
+                messages.error(request, 'Cannot modify the protected admin user.')
+                return HttpResponseRedirect(reverse('admin:auth_user_changelist'))
+            
             target_user = request.user
             
             # Security checks
@@ -219,6 +251,9 @@ class CustomUserAdmin(UserAdmin):
         if not (request.user.groups.filter(name='Admin').exists() or request.user.is_superuser):
             raise PermissionDenied
         
+        # Filter out protected admin user
+        queryset = queryset.exclude(username__iexact='admin')
+        
         admin_group, created = Group.objects.get_or_create(name='Admin')
         for user in queryset:
             if user != request.user:  # Prevent self-modification
@@ -234,6 +269,9 @@ class CustomUserAdmin(UserAdmin):
         # Check permission
         if not (request.user.groups.filter(name='Admin').exists() or request.user.is_superuser):
             raise PermissionDenied
+        
+        # Filter out protected admin user
+        queryset = queryset.exclude(username__iexact='admin')
         
         superuser_group, created = Group.objects.get_or_create(name='Superuser')
         for user in queryset:
@@ -251,6 +289,9 @@ class CustomUserAdmin(UserAdmin):
         if not (request.user.groups.filter(name='Admin').exists() or request.user.is_superuser):
             raise PermissionDenied
         
+        # Filter out protected admin user
+        queryset = queryset.exclude(username__iexact='admin')
+        
         staff_group, created = Group.objects.get_or_create(name='Staff')
         for user in queryset:
             if user != request.user:
@@ -266,6 +307,9 @@ class CustomUserAdmin(UserAdmin):
         # Check permission
         if not (request.user.groups.filter(name='Admin').exists() or request.user.is_superuser):
             raise PermissionDenied
+        
+        # Filter out protected admin user
+        queryset = queryset.exclude(username__iexact='admin')
         
         regular_group, created = Group.objects.get_or_create(name='Regular')
         for user in queryset:
@@ -348,6 +392,51 @@ class UserProfileAdmin(BaseAdmin):
     search_fields = ['user__username', 'user__first_name', 'user__last_name', 'location', 'bio']
     readonly_fields = ['user']
     
+    def get_queryset(self, request):
+        """
+        Exclude profiles of protected users
+        """
+        return super().get_queryset(request).exclude(user__username__iexact='admin')
+    
+    def has_view_permission(self, request, obj=None):
+        """
+        Check if user can view this profile
+        """
+        if not super().has_view_permission(request, obj):
+            return False
+        
+        # Don't allow viewing profile of protected admin user
+        if obj and obj.user.username.lower() == 'admin':
+            return False
+        
+        return True
+    
+    def has_change_permission(self, request, obj=None):
+        """
+        Check if user can change this profile
+        """
+        if not super().has_change_permission(request, obj):
+            return False
+        
+        # Don't allow changing profile of protected admin user
+        if obj and obj.user.username.lower() == 'admin':
+            return False
+        
+        return True
+    
+    def has_delete_permission(self, request, obj=None):
+        """
+        Check if user can delete this profile
+        """
+        if not super().has_delete_permission(request, obj):
+            return False
+        
+        # Don't allow deleting profile of protected admin user
+        if obj and obj.user.username.lower() == 'admin':
+            return False
+        
+        return True
+    
     fieldsets = (
         (None, {
             'fields': ('user', 'avatar')
@@ -365,6 +454,51 @@ class SecurityQuestionAdmin(BaseAdmin):
     list_filter = ['question_1', 'question_2', 'question_3']
     search_fields = ['user__username', 'user__email']
     readonly_fields = ['user']
+    
+    def get_queryset(self, request):
+        """
+        Exclude security questions of protected users
+        """
+        return super().get_queryset(request).exclude(user__username__iexact='admin')
+    
+    def has_view_permission(self, request, obj=None):
+        """
+        Check if user can view security questions
+        """
+        if not super().has_view_permission(request, obj):
+            return False
+        
+        # Don't allow viewing security questions of protected admin user
+        if obj and obj.user.username.lower() == 'admin':
+            return False
+        
+        return True
+    
+    def has_change_permission(self, request, obj=None):
+        """
+        Check if user can change security questions
+        """
+        if not super().has_change_permission(request, obj):
+            return False
+        
+        # Don't allow changing security questions of protected admin user
+        if obj and obj.user.username.lower() == 'admin':
+            return False
+        
+        return True
+    
+    def has_delete_permission(self, request, obj=None):
+        """
+        Check if user can delete security questions
+        """
+        if not super().has_delete_permission(request, obj):
+            return False
+        
+        # Don't allow deleting security questions of protected admin user
+        if obj and obj.user.username.lower() == 'admin':
+            return False
+        
+        return True
     
     fieldsets = (
         (None, {
