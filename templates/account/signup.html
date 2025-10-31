@@ -124,4 +124,39 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const questionSelects = document.querySelectorAll('select[id^="id_question_"]');
+    
+    function updateAvailableQuestions() {
+        const selectedValues = Array.from(questionSelects).map(select => select.value);
+        
+        questionSelects.forEach((select, index) => {
+            const currentValue = select.value;
+            const currentSelectId = select.id;
+            
+            Array.from(select.options).forEach(option => {
+                if (option.value && option.value !== '' && option.value !== currentValue) {
+                    // Check if this option is selected in any other dropdown
+                    if (selectedValues.includes(option.value) && selectedValues.indexOf(option.value) !== index) {
+                        option.style.display = 'none';
+                        option.disabled = true;
+                    } else {
+                        option.style.display = '';
+                        option.disabled = false;
+                    }
+                }
+            });
+        });
+    }
+    
+    questionSelects.forEach(select => {
+        select.addEventListener('change', updateAvailableQuestions);
+    });
+    
+    // Initial update
+    updateAvailableQuestions();
+});
+</script>
 {% endblock %}

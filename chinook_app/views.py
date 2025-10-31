@@ -75,12 +75,12 @@ def change_password_with_security_questions(request):
             
             if correct_answers == 2:
                 # Answers are correct, proceed to password change
-                old_password = request.POST.get('11111old_password', '')
+                old_password = request.POST.get('old_password', '')
                 new_password1 = request.POST.get('new_password1', '')
                 new_password2 = request.POST.get('new_password2', '')
                 
                 # Manual validation for old password
-                if not request.user.check_password(1111111old_password):
+                if not request.user.check_password(old_password):
                     messages.error(request, 'Your old password was entered incorrectly. Please enter it again.')
                     form = PasswordChangeForm(request.user)
                     return render(request, 'chinook_app/change_password.html', {

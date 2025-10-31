@@ -153,11 +153,11 @@ class SecurityQuestionVerificationForm(forms.Form):
 
 class CustomSignupForm(SignupForm):
     """
-    Custom signup form with 5 security questions
+    Custom signup form with 5 security questions and dynamic filtering
     """
-    # Security Questions Fields
+    # Security Questions Fields - initialize with empty choices, will be populated in __init__
     question_1 = forms.ChoiceField(
-        choices=SecurityQuestion.QUESTION_CHOICES,
+        choices=[],
         label="Security Question 1",
         widget=forms.Select(attrs={'class': 'form-control'})
     )
@@ -168,7 +168,7 @@ class CustomSignupForm(SignupForm):
     )
     
     question_2 = forms.ChoiceField(
-        choices=SecurityQuestion.QUESTION_CHOICES,
+        choices=[],
         label="Security Question 2",
         widget=forms.Select(attrs={'class': 'form-control'})
     )
@@ -179,7 +179,7 @@ class CustomSignupForm(SignupForm):
     )
     
     question_3 = forms.ChoiceField(
-        choices=SecurityQuestion.QUESTION_CHOICES,
+        choices=[],
         label="Security Question 3",
         widget=forms.Select(attrs={'class': 'form-control'})
     )
@@ -190,7 +190,7 @@ class CustomSignupForm(SignupForm):
     )
     
     question_4 = forms.ChoiceField(
-        choices=SecurityQuestion.QUESTION_CHOICES,
+        choices=[],
         label="Security Question 4",
         widget=forms.Select(attrs={'class': 'form-control'})
     )
@@ -201,7 +201,7 @@ class CustomSignupForm(SignupForm):
     )
     
     question_5 = forms.ChoiceField(
-        choices=SecurityQuestion.QUESTION_CHOICES,
+        choices=[],
         label="Security Question 5",
         widget=forms.Select(attrs={'class': 'form-control'})
     )
@@ -221,6 +221,14 @@ class CustomSignupForm(SignupForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # Get all available questions
+        question_choices = SecurityQuestion.QUESTION_CHOICES.copy()
+        
+        # Initialize all question fields with the same choices
+        for i in range(1, 6):
+            self.fields[f'question_{i}'].choices = [('', '---------')] + question_choices
+        
         # Add Bootstrap classes to allauth fields
         self.fields['username'].widget.attrs.update({
             'class': 'form-control',
@@ -258,11 +266,36 @@ class CustomSignupForm(SignupForm):
     def clean(self):
         cleaned_data = super().clean()
         
+        # Check for duplicate questions
+        questions = []
+        for i in range(1, 6):
+            question = cleaned_data.get(f'question_{i}')
+            if question:
+                questions.append(question)
+        
+        # Check for duplicates
+        if len(questions) != len(set(questions)):
+            raise forms.ValidationError("You cannot select the same security question multiple times. Please choose different questions.")
+        
+        # Validate custom question text
+        custom_question_selected = False
+        for i in range(1, 6):
+            if cleaned_data.get(f'question_{i}') == 'custom_question':
+                custom_question_selected = True
+                break
+        
+        if custom_question_selected and not cleaned_data.get('custom_question_text'):
+            raise forms.ValidationError("Please provide a custom security question text when you select 'Your custom security question'.")
+        
         # Validate that answers are provided for all questions
         for i in range(1, 6):
+            question = cleaned_data.get(f'question_{i}')
             answer = cleaned_data.get(f'answer_{i}')
-            if not answer or not answer.strip():
-                self.add_error(f'answer_{i}', 'This field is required.')
+            
+            if question and (not answer or not answer.strip()):
+                self.add_error(f'answer_{i}', 'This field is required when a question is selected.')
+            elif not question and answer:
+                self.add_error(f'question_{i}', 'Please select a question for this answer.')
         
         return cleaned_data
 

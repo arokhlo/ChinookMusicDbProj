@@ -33,6 +33,33 @@ class SecurityQuestion(models.Model):
     
     def __str__(self):
         return f"Security Questions for {self.user.username}"
+    
+    def get_available_questions(self):
+        """
+        Returns a list of available questions that haven't been used yet
+        """
+        used_questions = [
+            self.question_1,
+            self.question_2,
+            self.question_3,
+            self.question_4,
+            self.question_5,
+        ]
+        available_questions = [
+            (choice[0], choice[1]) for choice in self.QUESTION_CHOICES 
+            if choice[0] not in used_questions
+        ]
+        return available_questions
+    
+    def get_question_display(self, question_field):
+        """
+        Returns the display text for a question field
+        """
+        question_value = getattr(self, question_field)
+        for choice in self.QUESTION_CHOICES:
+            if choice[0] == question_value:
+                return choice[1]
+        return question_value
 
 
 def user_avatar_path(instance, filename):
