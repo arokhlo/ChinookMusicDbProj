@@ -120,18 +120,6 @@ class SecurityQuestionVerificationForm(forms.Form):
         for i, question_data in enumerate(security_questions):
             question_text = question_data['question']
             
-            # Handle custom questions if needed
-            if question_data['question'] == 'custom_question':
-                try:
-                    # Try to get custom question text from session or database
-                    username = getattr(self, 'username', '')
-                    if username:
-                        user = User.objects.get(username=username)
-                        security_qs = SecurityQuestion.objects.get(user=user)
-                        question_text = security_qs.custom_question_text or "Custom security question"
-                except (User.DoesNotExist, SecurityQuestion.DoesNotExist):
-                    question_text = "Custom security question"
-            
             self.fields[f'answer_{i+1}'] = forms.CharField(
                 max_length=255,
                 label=f"Question {i+1}: {question_text}",
@@ -210,14 +198,6 @@ class CustomSignupForm(SignupForm):
         label="Answer 5",
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
-    
-    custom_question_text = forms.CharField(
-        max_length=255, 
-        required=False, 
-        label="Your custom question text (if you selected custom question)",
-        help_text="Only fill this if you selected 'Your custom security question' for any question above",
-        widget=forms.TextInput(attrs={'class': 'form-control'})
-    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -277,16 +257,6 @@ class CustomSignupForm(SignupForm):
         if len(questions) != len(set(questions)):
             raise forms.ValidationError("You cannot select the same security question multiple times. Please choose different questions.")
         
-        # Validate custom question text
-        custom_question_selected = False
-        for i in range(1, 6):
-            if cleaned_data.get(f'question_{i}') == 'custom_question':
-                custom_question_selected = True
-                break
-        
-        if custom_question_selected and not cleaned_data.get('custom_question_text'):
-            raise forms.ValidationError("Please provide a custom security question text when you select 'Your custom security question'.")
-        
         # Validate that answers are provided for all questions
         for i in range(1, 6):
             question = cleaned_data.get(f'question_{i}')
@@ -315,7 +285,6 @@ class CustomSignupForm(SignupForm):
             answer_4=self.cleaned_data['answer_4'].lower().strip(),
             question_5=self.cleaned_data['question_5'],
             answer_5=self.cleaned_data['answer_5'].lower().strip(),
-            custom_question_text=self.cleaned_data.get('custom_question_text', '')
         )
         security_questions.save()
         

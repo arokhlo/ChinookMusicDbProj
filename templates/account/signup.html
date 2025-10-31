@@ -104,11 +104,6 @@
                             </div>
                         </div>
 
-                        <!-- Custom Question Text -->
-                        <div class="mb-3">
-                            {{ form.custom_question_text|as_crispy_field }}
-                        </div>
-
                         {% if redirect_field_value %}
                         <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
                         {% endif %}

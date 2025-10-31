@@ -15,7 +15,7 @@ class SecurityQuestion(models.Model):
         ('father_birth_year', '2. What is your father\'s birth year?'),
         ('mother_name', '3. What is your mother\'s name?'),
         ('father_name', '4. What is your father\'s name?'),
-        ('custom_question', '5. Your custom security question'),
+        ('favourite_colour', '5. What is your favourite colour?'),
     ]
     
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -29,7 +29,6 @@ class SecurityQuestion(models.Model):
     answer_4 = models.CharField(max_length=255)
     question_5 = models.CharField(max_length=50, choices=QUESTION_CHOICES)
     answer_5 = models.CharField(max_length=255)
-    custom_question_text = models.CharField(max_length=255, blank=True, null=True)
     
     def __str__(self):
         return f"Security Questions for {self.user.username}"
