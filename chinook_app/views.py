@@ -1,4 +1,3 @@
-
 import os
 import random
 from django.shortcuts import render, redirect, get_object_or_404
@@ -75,168 +74,6 @@ def change_password_with_security_questions(request):
             
             if correct_answers == 2:
                 # Answers are correct, proceed to password change
-                old_password = request.POST.get('old_password', '')
-                new_password1 = request.POST.get('new_password1', '')
-                new_password2 = request.POST.get('new_password2', '')
-                
-                # Manual validation for old password
-                if not request.user.check_password(old_password):
-                    messages.error(request, 'Your old password was entered incorrectly. Please enter it again.')
-                    form = PasswordChangeForm(request.user)
-                    return render(request, 'chinook_app/change_password.html', {
-                        'form': form,
-                        'security_verified': True
-                    })
-                
-                # Check if new passwords match
-                if new_password1 != new_password2:
-                    messages.error(request, 'The two new password fields did not match.')
-                    form = PasswordChangeForm(request.user)
-                    return render(request, 'chinook_app/change_password.html', {
-                        'form': form,
-                        'security_verified': True
-                    })
-                
-                # If validation passes, change the password
-                try:
-                    request.user.set_password(new_password1)
-                    request.user.save()
-                    update_session_auth_hash(request, request.user)
-                    messages.success(request, 'Your password was successfully updated!')
-                    return redirect('profile')
-                except Exception as e:
-                    messages.error(request, f'Error changing password: {str(e)}')
-                    form = PasswordChangeForm(request.user)
-                    return render(request, 'chinook_app/change_password.html', {
-                        'form': form,
-                        'security_verified': True
-                    })
-                
-            else:
-                messages.error(request, 'Incorrect answers to security questions. Please try again.')
-                return redirect('change_password_with_security')
-        
-        else:
-            # This handles the case when security is already verified
-            old_password = request.POST.get('old_password', '')
-            new_password1 = request.POST.get('new_password1', '')
-            new_password2 = request.POST.get('new_password2', '')
-            
-            # Manual validation for old password
-            if not request.user.check_password(old_password):
-                messages.error(request, 'Your old password was entered incorrectly. Please enter it again.')
-                form = PasswordChangeForm(request.user)
-                return render(request, 'chinook_app/change_password.html', {
-                    'form': form,
-                    'security_verified': True
-                })
-            
-            # Check if new passwords match
-            if new_password1 != new_password2:
-                messages.error(request, 'The two new password fields did not match.')
-                form = PasswordChangeForm(request.user)
-                return render(request, 'chinook_app/change_password.html', {
-                    'form': form,
-                    'security_verified': True
-                })
-            
-            # If validation passes, change the password
-            try:
-                request.user.set_password(new_password1)
-                request.user.save()
-                update_session_auth_hash(request, request.user)
-                messages.success(request, 'Your password was successfully updated!')
-                return redirect('profile')
-            except Exception as e:
-                messages.error(request, f'Error changing password: {str(e)}')
-                form = PasswordChangeForm(request.user)
-                return render(request, 'chinook_app/change_password.html', {
-                    'form': form,
-                    'security_verified': True
-                })
-    
-    else:
-        # GET request - show security questions
-        try:
-            user_questions = SecurityQuestion.objects.get(user=request.user)
-        except SecurityQuestion.DoesNotExist:
-            messages.error(request, 'Security questions not set up for your account.')
-            return redirect('profile')
-        
-        # Get all available questions
-        available_questions = []
-        question_fields = ['question_1', 'question_2', 'question_3', 'question_4', 'question_5']
-        
-        for field in question_fields:
-            question_value = getattr(user_questions, field)
-            if question_value:  # Only include questions that have values
-                available_questions.append(question_value)
-        
-        if len(available_questions) < 2:
-            messages.error(request, 'You need to set up at least 2 security questions.')
-            return redirect('profile')
-        
-        # Randomly select 2 questions
-        selected_questions = random.sample(available_questions, 2)
-        
-        return render(request, 'chinook_app/change_password.html', {
-            'security_questions': selected_questions,
-            'question1_id': selected_questions[0],
-            'question2_id': selected_questions[1],
-            'show_security_questions': True
-        })
-    
-    # Default fallback
-    form = PasswordChangeForm(request.user)
-    return render(request, 'chinook_app/change_password.html', {'form': form})
-
-@login_required
-def change_password_with_security_questions(request):
-    """
-    Handle password change with security question verification
-    """
-    if request.method == 'POST':
-        # Check if we're in the security questions phase or password change phase
-        if 'security_answers' in request.POST:
-            # Verify security questions
-            question1_id = request.POST.get('question1_id')
-            question2_id = request.POST.get('question2_id')
-            answer1 = request.POST.get('answer1', '').strip().lower()
-            answer2 = request.POST.get('answer2', '').strip().lower()
-            
-            # Get user's security questions
-            try:
-                user_questions = SecurityQuestion.objects.get(user=request.user)
-            except SecurityQuestion.DoesNotExist:
-                messages.error(request, 'Security questions not set up for your account.')
-                return redirect('profile')
-            
-            # Verify answers
-            correct_answers = 0
-            question_fields = [
-                ('question_1', 'answer_1'),
-                ('question_2', 'answer_2'), 
-                ('question_3', 'answer_3'),
-                ('question_4', 'answer_4'),
-                ('question_5', 'answer_5')
-            ]
-            
-            # Check first question
-            for q_field, a_field in question_fields:
-                if getattr(user_questions, q_field) == question1_id:
-                    if getattr(user_questions, a_field).lower() == answer1:
-                        correct_answers += 1
-                    break
-            
-            # Check second question
-            for q_field, a_field in question_fields:
-                if getattr(user_questions, q_field) == question2_id:
-                    if getattr(user_questions, a_field).lower() == answer2:
-                        correct_answers += 1
-                    break
-            
-            if correct_answers == 2:
-                # Answers are correct, proceed to password change
                 form = PasswordChangeForm(request.user, request.POST)
                 if form.is_valid():
                     user = form.save()
@@ -261,6 +98,11 @@ def change_password_with_security_questions(request):
                 update_session_auth_hash(request, user)
                 messages.success(request, 'Your password was successfully updated!')
                 return redirect('profile')
+            else:
+                return render(request, 'chinook_app/change_password.html', {
+                    'form': form,
+                    'security_verified': True
+                })
     
     else:
         # GET request - show security questions
@@ -292,10 +134,6 @@ def change_password_with_security_questions(request):
             'question2_id': selected_questions[1],
             'show_security_questions': True
         })
-    
-    # Default fallback
-    form = PasswordChangeForm(request.user)
-    return render(request, 'chinook_app/change_password.html', {'form': form})
 
 # ===== SECURITY QUESTION PASSWORD RESET VIEWS =====
 @method_decorator(csrf_protect, name='dispatch')
@@ -399,7 +237,45 @@ def user_management(request):
     """
     User management page - only accessible by Admin users
     """
-    # ... rest of the function remains the same
+    users = User.objects.select_related('userprofile').all().order_by('-date_joined')
+    
+    if request.method == 'POST' and request.user.is_superuser:
+        user_id = request.POST.get('user_id')
+        action = request.POST.get('action')
+        
+        try:
+            user = User.objects.get(id=user_id)
+            if action == 'deactivate':
+                user.is_active = False
+                user.save()
+                messages.success(request, f'User {user.username} has been deactivated.')
+            elif action == 'activate':
+                user.is_active = True
+                user.save()
+                messages.success(request, f'User {user.username} has been activated.')
+            elif action == 'delete' and request.user.is_superuser:
+                username = user.username
+                user.delete()
+                messages.success(request, f'User {username} has been deleted.')
+            
+        except User.DoesNotExist:
+            messages.error(request, 'User not found.')
+        
+        return redirect('user_management')
+    
+    # Calculate statistics
+    total_users = users.count()
+    active_users = users.filter(is_active=True).count()
+    staff_users = users.filter(is_staff=True).count()
+    superusers = users.filter(is_superuser=True).count()
+    
+    return render(request, 'chinook_app/user_management.html', {
+        'users': users,
+        'total_users': total_users,
+        'active_users': active_users,
+        'staff_users': staff_users,
+        'superusers': superusers
+    })
 
 @login_required
 def delete_album_frontend(request, album_id):
@@ -640,53 +516,6 @@ def delete_avatar(request):
         'user_profile': user_profile
     })
 
-# ===== ADMIN USER MANAGEMENT VIEWS =====
-@staff_member_required
-def user_management(request):
-    """
-    User management page - only accessible by admin/staff users
-    """
-    users = User.objects.select_related('userprofile').all().order_by('-date_joined')
-    
-    # Handle user activation/deactivation
-    if request.method == 'POST' and request.user.is_superuser:
-        user_id = request.POST.get('user_id')
-        action = request.POST.get('action')
-        
-        try:
-            user = User.objects.get(id=user_id)
-            if action == 'deactivate':
-                user.is_active = False
-                user.save()
-                messages.success(request, f'User {user.username} has been deactivated.')
-            elif action == 'activate':
-                user.is_active = True
-                user.save()
-                messages.success(request, f'User {user.username} has been activated.')
-            elif action == 'delete' and request.user.is_superuser:
-                username = user.username
-                user.delete()
-                messages.success(request, f'User {username} has been deleted.')
-            
-        except User.DoesNotExist:
-            messages.error(request, 'User not found.')
-        
-        return redirect('user_management')
-    
-    # Calculate statistics
-    total_users = users.count()
-    active_users = users.filter(is_active=True).count()
-    staff_users = users.filter(is_staff=True).count()
-    superusers = users.filter(is_superuser=True).count()
-    
-    return render(request, 'chinook_app/user_management.html', {
-        'users': users,
-        'total_users': total_users,
-        'active_users': active_users,
-        'staff_users': staff_users,
-        'superusers': superusers
-    })
-
 # ===== CORE APPLICATION VIEWS =====
 def index(request):
     """
@@ -741,6 +570,44 @@ def search_artist(request):
     
     return render(request, 'chinook_app/search_artist.html', {
         'artists': artists,
+        'search_term': search_term
+    })
+
+def search_album(request):
+    """
+    Search albums by title
+    """
+    albums = None
+    search_term = ''
+    
+    if request.method == 'POST':
+        search_term = request.POST.get('search_term', '')
+        if search_term:
+            albums = Album.objects.filter(
+                Q(Title__icontains=search_term)
+            ).select_related('ArtistId').order_by('Title')
+    
+    return render(request, 'chinook_app/search_album.html', {
+        'albums': albums,
+        'search_term': search_term
+    })
+
+def search_track(request):
+    """
+    Search tracks by name
+    """
+    tracks = None
+    search_term = ''
+    
+    if request.method == 'POST':
+        search_term = request.POST.get('search_term', '')
+        if search_term:
+            tracks = Track.objects.filter(
+                Q(Name__icontains=search_term)
+            ).select_related('AlbumId', 'AlbumId__ArtistId').order_by('Name')
+    
+    return render(request, 'chinook_app/search_track.html', {
+        'tracks': tracks,
         'search_term': search_term
     })
 
@@ -1042,46 +909,6 @@ def update_review(request, review_id):
     return render(request, 'chinook_app/update_review.html', {
         'form': form,
         'review': review
-    })
-
-# Add these new search functions to your views.py file
-
-def search_album(request):
-    """
-    Search albums by title
-    """
-    albums = None
-    search_term = ''
-    
-    if request.method == 'POST':
-        search_term = request.POST.get('search_term', '')
-        if search_term:
-            albums = Album.objects.filter(
-                Q(Title__icontains=search_term)
-            ).select_related('ArtistId').order_by('Title')
-    
-    return render(request, 'chinook_app/search_album.html', {
-        'albums': albums,
-        'search_term': search_term
-    })
-
-def search_track(request):
-    """
-    Search tracks by name
-    """
-    tracks = None
-    search_term = ''
-    
-    if request.method == 'POST':
-        search_term = request.POST.get('search_term', '')
-        if search_term:
-            tracks = Track.objects.filter(
-                Q(Name__icontains=search_term)
-            ).select_related('AlbumId', 'AlbumId__ArtistId').order_by('Name')
-    
-    return render(request, 'chinook_app/search_track.html', {
-        'tracks': tracks,
-        'search_term': search_term
     })
 
 @login_required
