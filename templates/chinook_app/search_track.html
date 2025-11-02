@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Search Track{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Search Track</h2>
+        
+        <form method="post" class="mb-4">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="search_term">Enter track name to search:</label>
+                <input type="text" id="search_term" name="search_term" value="{{ search_term }}" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+
+        {% if tracks is not None %}
+            <h3>Search Results for '{{ search_term }}' ({{ tracks|length }} found)</h3>
+            
+            {% if tracks %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Track ID</th>
+                                <th>Name</th>
+                                <th>Album</th>
+                                <th>Artist</th>
+                                <th>Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for track in tracks %}
+                            <tr>
+                                <td>{{ track.TrackId }}</td>
+                                <td>{{ track.Name }}</td>
+                                <td>
+                                    {% if track.AlbumId %}
+                                        {{ track.AlbumId.Title }}
+                                    {% else %}
+                                        <span class="text-muted">No Album</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if track.AlbumId and track.AlbumId.ArtistId %}
+                                        {{ track.AlbumId.ArtistId.Name }}
+                                    {% else %}
+                                        <span class="text-muted">Unknown Artist</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ track.duration_formatted }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-warning">
+                    No tracks found matching '{{ search_term }}'.
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -33,7 +33,9 @@ path('accounts/password/change/', views.change_password_with_security_questions,
     path('albums/', views.all_albums, name='all_albums'),
     
     # ===== SEARCH & FILTER PAGES =====
-    path('search/', views.search_artist, name='search_artist'),
+    path('search-artist/', views.search_artist, name='search_artist'),
+    path('search-album/', views.search_album, name='search_album'),
+    path('search-track/', views.search_track, name='search_track'),
     path('artist-albums/', views.artist_albums, name='artist_albums'),
     path('album-tracks/', views.album_tracks, name='album_tracks'),
     

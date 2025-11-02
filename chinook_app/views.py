@@ -1044,6 +1044,46 @@ def update_review(request, review_id):
         'review': review
     })
 
+# Add these new search functions to your views.py file
+
+def search_album(request):
+    """
+    Search albums by title
+    """
+    albums = None
+    search_term = ''
+    
+    if request.method == 'POST':
+        search_term = request.POST.get('search_term', '')
+        if search_term:
+            albums = Album.objects.filter(
+                Q(Title__icontains=search_term)
+            ).select_related('ArtistId').order_by('Title')
+    
+    return render(request, 'chinook_app/search_album.html', {
+        'albums': albums,
+        'search_term': search_term
+    })
+
+def search_track(request):
+    """
+    Search tracks by name
+    """
+    tracks = None
+    search_term = ''
+    
+    if request.method == 'POST':
+        search_term = request.POST.get('search_term', '')
+        if search_term:
+            tracks = Track.objects.filter(
+                Q(Name__icontains=search_term)
+            ).select_related('AlbumId', 'AlbumId__ArtistId').order_by('Name')
+    
+    return render(request, 'chinook_app/search_track.html', {
+        'tracks': tracks,
+        'search_term': search_term
+    })
+
 @login_required
 def delete_review(request, review_id):
     """
