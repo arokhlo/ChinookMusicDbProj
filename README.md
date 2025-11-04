@@ -1,9 +1,5 @@
 # 🎵 Chinook Music Database Project
 
-## 🤖 AI Assistance Disclosure
-Portions of this project were developed with the assistance of AI tools such as **GitHub Copilot** and **ChatGPT**.  
-These tools were used to help with tasks including code generation, debugging, documentation writing, and UI/UX suggestions.
-
 # 🎵 Chinook Music Database
 ![Chinook Music Database Banner](static/images/banner.png)
 ![Django](https://img.shields.io/badge/Django-5.2.7-green)
@@ -114,6 +110,32 @@ Wireframes were designed to visualize the core structure:
 - **Deployment:** Heroku / Render  
 - **Authentication:** Django Allauth  
 - **Static Files:** WhiteNoise  
+
+---
+
+## 🤖 AI Implementation
+This project was developed with assistance from AI tools including GitHub Copilot, ChatGPT, and Canva AI. These tools supported development tasks such as Django view logic, form handling, URL configuration, debugging, and logo design. 
+All AI-generated content was thoroughly reviewed, tested, and adapted to meet the project's specific requirements and quality standards.
+
+---
+
+# Credits
+
+## Code & Development
+- **Django Documentation** - For guidance on configuring apps, models, views, and deployment
+- **Bootstrap Documentation** - For layout components and responsive design implementation  
+- **PostgreSQL Documentation** - Database configuration and optimization reference
+- **Code Institute Django Walkthrough** - Foundation reference for authentication and CRUD functionality
+
+## Design & Assets
+- **Canva** - Logo design and visual asset creation
+- Modern music application UI patterns for design inspiration
+- Font Awesome and Bootstrap Icons for interface icons
+
+## Acknowledgments
+I would like to extend my sincere gratitude to the developer community for their invaluable resources and documentation. Special thanks to the contributors behind Django and PostgreSQL, whose foundational work made this project possible.
+I am also grateful to **Code Institute** for their support during the Full Stack Developer Bootcamp, and for the positive guidance I received throughout my learning journey.
+This project builds upon the classic Chinook database schema, enhanced with modern web application features and custom improvements.
 
 ---
 
