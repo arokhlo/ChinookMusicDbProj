@@ -14,6 +14,10 @@
 The **Chinook Music Database** is a Django-based web application that enables users, administrators, and store owners to manage artists, albums, tracks, and playlists with full CRUD functionality. Built with Django, PostgreSQL, and Bootstrap, it offers secure authentication, advanced search, and a responsive, music-themed interface. Developed using agile methodology, it focuses on user-centered design, efficient data management, and accessibility across all devices.
 ---
 
+<p align="center"><img src="/static/images/home.png"></p>
+<h2 align="center"><a href="https://chinookmusicdbpro-1a8fd737fe52.herokuapp.com/">Website Link | <a href="https://github.com/users/arokhlo/projects/11/views/1">Project Board</a></h2>                                                                                                                                                           
+---
+
 ## 🧭 Table of Contents
 - [User Stories](#user-stories)
 - [UX Design](#ux-design)
