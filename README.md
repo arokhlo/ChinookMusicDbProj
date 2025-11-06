@@ -9,12 +9,10 @@
 
 ## 🌐 Live Application
 [Visit the Chinook Music Database](https://chinookmusicdbpro-1a8fd737fe52.herokuapp.com/)
-
 ---
 
 ## 📋 Project Overview
 The **Chinook Music Database** is a Django-based web application that enables users, administrators, and store owners to manage artists, albums, tracks, and playlists with full CRUD functionality. Built with Django, PostgreSQL, and Bootstrap, it offers secure authentication, advanced search, and a responsive, music-themed interface. Developed using agile methodology, it focuses on user-centered design, efficient data management, and accessibility across all devices.
-
 ---
 
 ## 🧭 Table of Contents
@@ -52,7 +50,6 @@ The **Chinook Music Database** is a Django-based web application that enables us
 - Rate and review albums  
 - Share content on social media  
 - Export playlists for use in other apps  
-
 ---
 
 ## 🎨 UX Design
@@ -72,7 +69,6 @@ Wireframes were designed to visualize the core structure:
 
 ![Wireframe Desktop](static/images/wireframe-desktop.png)
 ![Wireframe Mobile](static/images/wireframe-mobile.png)
-
 ---
 
 ## ✨ Features
@@ -91,7 +87,6 @@ Wireframes were designed to visualize the core structure:
 - Social media sharing  
 - Analytics dashboard  
 - Playlist import/export  
-
 ---
 
 ## 🧩 Technology Stack
@@ -102,7 +97,6 @@ Wireframes were designed to visualize the core structure:
 - **Deployment:** Heroku  
 - **Authentication:** Django Allauth  
 - **Static Files:** WhiteNoise  
-
 ---
 
 ## 🔄 Agile Development
@@ -117,7 +111,6 @@ Wireframes were designed to visualize the core structure:
 - **Music Catalog Management:** Browse, search, and filter functionality
 - **CRUD Operations:** Full create, read, update, delete functionality
 - **User Experience & Design:** Responsive design and intuitive interface
-
 ---
 
 ## 🗃️ Database Models
@@ -133,7 +126,6 @@ Wireframes were designed to visualize the core structure:
 - **UserProfile** - Extended user profile with avatar, bio, and personal information
 - **SecurityQuestion** - Custom security system for enhanced password recovery
 - **Review** - User reviews with star ratings and comment system
-
 ---
 
 ## ✅ Testing & Validation
@@ -173,7 +165,6 @@ python manage.py test accounts
 - **PostgreSQL Integration** - Production database optimization
 - **Custom Admin Interface** - Enhanced Django admin with filters
 - **Heroku Deployment** - Production-ready deployment configuration
-
 ---
 
 ## 🛠️ Installation & Setup
@@ -207,8 +198,6 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
----
-
 ## 🚀 Deployment
 
 ### Production Environment
@@ -220,9 +209,9 @@ python manage.py runserver
 ```bash
 # Set production environment variables
 heroku config:set DEBUG=False
-heroku config:set SECRET_KEY=your-production-secret
-heroku config:set ALLOWED_HOSTS=your-app.herokuapp.com
-
+heroku config:set SECRET_KEY=django-insecure-chinook-secret-key-2024
+heroku config:set ALLOWED_HOSTS=chinookmusicdbpro-1a8fd737fe52.herokuapp.com
+                
 # Deploy to Heroku
 git push heroku main
 heroku run python manage.py migrate
@@ -231,16 +220,13 @@ heroku run python manage.py collectstatic
 
 ### Environment Configuration
 ```python
-DEBUG = False
-ALLOWED_HOSTS = ['your-app.herokuapp.com']
-DATABASES = {'default': dj_database_url.config()}
-```
-
+DEBUG=False
+SECRET_KEY=django-insecure-chinook-secret-key-2024
+DATABASE_URL=postgresql://neondb_owner:npg_FgsZR9MWb8Sr@ep-long-dust-aggdj4tj.c-2.eu-central-1.aws.neon.tech/alive_smell_rank_585650
 ---
 
 ## 🤖 AI Implementation
 This project was developed with assistance from AI tools including GitHub Copilot, ChatGPT, and Canva AI. These tools supported development tasks such as Django view logic, form handling, URL configuration, debugging, and logo design. All AI-generated content was thoroughly reviewed, tested, and adapted to meet the project's specific requirements and quality standards.
-
 ---
 
 ## 🏆 Credits
@@ -258,11 +244,8 @@ This project was developed with assistance from AI tools including GitHub Copilo
 
 ### Acknowledgments
 I would like to extend my sincere gratitude to the developer community for their invaluable resources and documentation. Special thanks to the contributors behind Django and PostgreSQL, whose foundational work made this project possible.
-
 I am also grateful to **Code Institute** for their support during the Full Stack Developer Bootcamp, and for the positive guidance I received throughout my learning journey.
-
 This project builds upon the classic Chinook database schema, enhanced with modern web application features and custom improvements.
-
 ---
 
 ## 📞 Support
