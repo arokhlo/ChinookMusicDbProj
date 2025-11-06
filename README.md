@@ -1,6 +1,5 @@
 # 🎵 Chinook Music Database Project
 
-![Chinook Music Database Banner](static/images/banner.png)
 ![Django](https://img.shields.io/badge/Django-5.2.7-green)
 ![Python](https://img.shields.io/badge/Python-3.12.10-blue)
 ![Database](https://img.shields.io/badge/PostgreSQL-Supported-orange)
@@ -59,7 +58,7 @@ The **Chinook Music Database** is a Django-based web application that enables us
 - High contrast and vibrant accents for readability and engagement  
 - Fully responsive across all devices  
 
-![Colours](static/images/colors.png)
+![Colours](static/images/axmortaza.png)
 
 ### 🖼️ Wireframes
 Wireframes were designed to visualize the core structure:
@@ -67,8 +66,6 @@ Wireframes were designed to visualize the core structure:
 - Artist/Album pages – Detailed listings  
 - Admin Dashboard – CRUD management interface  
 
-![Wireframe Desktop](static/images/wireframe-desktop.png)
-![Wireframe Mobile](static/images/wireframe-mobile.png)
 ---
 
 ## ✨ Features
