@@ -107,6 +107,12 @@ Wireframes were designed to visualize the core structure:
 - **Sprint Cycles:** 2-week sprints with defined goals and deliverables
 - **User Stories:** 93% completion rate (14/15 stories implemented)
 
+<br>
+<img src="/static/images/projectboard.png">
+<br>
+<a href="https://github.com/users/arokhlo/projects/11/views/1">Project Board</a>
+<br><br>
+
 ### Epics & Milestones
 - **User Authentication & Security:** Secure login, registration, and password recovery
 - **Music Catalog Management:** Browse, search, and filter functionality
@@ -138,6 +144,132 @@ Wireframes were designed to visualize the core structure:
 | Album Management | Admin can CRUD albums | ✅ PASS |
 | Security Questions | Password reset works | ✅ PASS |
 | Search Functionality | Users can search content | ✅ PASS |
+
+11111111111111111111111111111111111111111111111111111111111111111111111111111111111111
+<h2 id="python-validation">Python Validation</h2>
+
+All pages are clear of any errors and pass PEP8 standard:
+
+<h2>Admin views:</h2>
+<br>
+<img src="/static/images/admin_views.png">
+<br><br>
+
+<h2>Developer Models:</h2>
+<br>
+<img src="/static/images/developer_models.png">
+<br><br>
+
+<h2>Developer URLs:</h2>
+<br>
+<img src="/static/images/developer_urls.png">
+<br><br>
+
+<h2>Developer Views:</h2>
+<br>
+<img src="/static/images/developer_views.png">
+<br><br>
+
+<h2>Home URLs:</h2>
+<br>
+<img src="/static/images/home_urls.png">
+<br><br>
+
+<h2>Home Views:</h2>
+<br>
+<img src="/static/images/home_views.png">
+<br><br>
+
+<h2>IGDB Service:</h2>
+<br>
+<img src="/static/images/igdb_service.png">
+<br><br>
+
+<h2>Populate Reviews:</h2>
+<br>
+<img src="/static/images/populate_reviews.png">
+<br><br>
+
+<h2>Populate Models:</h2>
+<br>
+<img src="/static/images/publisher_models.png">
+<br><br>
+
+<h2>Publisher Models:</h2>
+<br>
+<img src="/static/images/publisher_models.png">
+<br><br>
+
+<h2>Publisher URLs:</h2>
+<br>
+<img src="/static/images/publisher_urls.png">
+<br><br>
+
+<h2>Publisher Views:</h2>
+<br>
+<img src="/static/images/publisher_views.png">
+<br><br>
+
+<h2>Review Models:</h2>
+<br>
+<img src="/static/images/reviews_models.png">
+<br><br>
+
+<h2>Review URLs:</h2>
+<br>
+<img src="/static/images/reviews_urls.png">
+<br><br>
+
+<h2>Review Views:</h2>
+<br>
+<img src="/static/images/reviews_views.png">
+<br><br>
+
+<h2 id="html-validation">HTML Validation</h2>
+HTML Validation passes successfully with no errors, I have only shown the one index.html validation for brevity given the amount of pages validated. The following pages were all checked and clear of any errors:
+<br><br>
+index.html<br>
+base.html<br>
+profile.html<br>
+change_password.html<br>
+albums.html<br>
+artists.html<br>
+artist_albums.html<br>
+add_album.html<br>
+add_artist.html<br>
+search_album.html<br>
+search_artist.html<br>
+search_track.html<br>
+delete_album.html<br>
+delete_artist.html<br>
+delete_confirm.html<br>
+update_album.html<br>
+update_artist.html<br>
+user_management.html<br>
+login.html<br>
+signup.html<br>
+password_reset_from_questions.html<br>
+security_question_reset.html<br>
+security_question_verify.html<br>
+
+<br><br>
+<img src="/static/images/py/index_validartion.png" alt="HTML Validation">
+<br>
+
+<h2 id="css-validation">CSS Validation</h2>
+CSS Validation passes successfully with no errors, there are some warnings for using webkit within the CSS as this is a vendor specific code:
+<br><br>
+<img src="/static/images/css.png" alt="CSS Validation">
+<br>
+
+
+<h2 id="lighthouse">Lighthouse</h2>
+Lighthouse scores 94% for perforamnce. Best practices scores 100%. This is due to Cloudinary serving the game cover images that are stored via HTTP rather than HTTPS:
+<br><br>
+<img src="/static/images/py/lighthouse.png" alt="Lighthouse Score">
+<br>
+
+111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
 
 ### Automated Testing
 ```bash
