@@ -351,11 +351,11 @@ heroku run python manage.py collectstatic
 ```
 
 ### Environment Configuration
-```python
+```bash
 DEBUG=False
 SECRET_KEY=django-insecure-chinook-secret-key-2024
 DATABASE_URL=postgresql://neondb_owner:npg_FgsZR9MWb8Sr@ep-long-dust-aggdj4tj.c-2.eu-central-1.aws.neon.tech/alive_smell_rank_585650
-```text
+```
 
 ## 🤖 AI Implementation
 This project was developed with assistance from AI tools including GitHub Copilot, ChatGPT, and Canva AI. These tools supported development tasks such as Django view logic, form handling, URL configuration, debugging, and logo design. All AI-generated content was thoroughly reviewed, tested, and adapted to meet the project's specific requirements and quality standards.
