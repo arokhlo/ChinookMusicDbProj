@@ -369,12 +369,12 @@ This project was developed with assistance from AI tools including GitHub Copilo
 - **PostgreSQL Documentation** - Database configuration and optimization reference
 - **Code Institute Django Walkthrough** - Foundation reference for authentication and CRUD functionality
 
-### Design & Assets
+### 🎨 Design & Assets
 - **Canva** - Logo design and visual asset creation
 - Modern music application UI patterns for design inspiration
 - Font Awesome and Bootstrap Icons for interface icons
 
-### Acknowledgments
+### 🙏 Acknowledgments
 I would like to extend my sincere gratitude to the developer community for their invaluable resources and documentation. Special thanks to the contributors behind Django and PostgreSQL, whose foundational work made this project possible.
 I am also grateful to **Code Institute** for their support during the Full Stack Developer Bootcamp, and for the positive guidance I received throughout my learning journey.
 This project builds upon the classic Chinook database schema, enhanced with modern web application features and custom improvements.
