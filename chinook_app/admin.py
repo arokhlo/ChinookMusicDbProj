@@ -173,7 +173,9 @@ class CustomUserAdmin(UserAdmin):
 
         links = []
         admin_url = reverse("admin:assign_group", args=[obj.id, "admin"])
-        superuser_url = reverse("admin:assign_group", args=[obj.id, "superuser"])
+        superuser_url = reverse(
+            "admin:assign_group", args=[obj.id, "superuser"]
+        )
         staff_url = reverse("admin:assign_group", args=[obj.id, "staff"])
         regular_url = reverse("admin:assign_group", args=[obj.id, "regular"])
 
@@ -215,62 +217,63 @@ class CustomUserAdmin(UserAdmin):
 
             # Prevent modifying protected admin user
             if user.username.lower() == 'admin':
-                messages.error(request, 'Cannot modify the protected admin user.')
-                return HttpResponseRedirect(reverse('admin:auth_user_changelist'))
+                msg = 'Cannot modify the protected admin user.'
+                messages.error(request, msg)
+                url = reverse('admin:auth_user_changelist')
+                return HttpResponseRedirect(url)
 
             target_user = request.user
 
             # Security checks
             if user == target_user:
-                messages.error(request, 'You cannot modify your own group assignments.')
-                return HttpResponseRedirect(reverse('admin:auth_user_changelist'))
+                msg = 'You cannot modify your own group assignments.'
+                messages.error(request, msg)
+                url = reverse('admin:auth_user_changelist')
+                return HttpResponseRedirect(url)
 
             if not target_user.is_superuser:
-                messages.error(request, 'Only superusers can modify user groups.')
-                return HttpResponseRedirect(reverse('admin:auth_user_changelist'))
+                msg = 'Only superusers can modify user groups.'
+                messages.error(request, msg)
+                url = reverse('admin:auth_user_changelist')
+                return HttpResponseRedirect(url)
 
             # Clear existing groups and assign new one
             user.groups.clear()
 
             if group_type == 'admin':
-                admin_group, created = Group.objects.get_or_create(name='Admin')
-                user.groups.add(admin_group)
+                group, created = Group.objects.get_or_create(name='Admin')
+                user.groups.add(group)
                 user.is_staff = True
                 user.is_superuser = True
-                messages.success(
-                    request,
-                    f'User {user.username} assigned to Admin group with full permissions.'
+                msg = (
+                    f'User {user.username} assigned to '
+                    'Admin group with full permissions.'
                 )
+                messages.success(request, msg)
 
             elif group_type == 'superuser':
-                superuser_group, created = Group.objects.get_or_create(name='Superuser')
-                user.groups.add(superuser_group)
+                group, created = Group.objects.get_or_create(name='Superuser')
+                user.groups.add(group)
                 user.is_staff = True
                 user.is_superuser = True
-                messages.success(
-                    request,
-                    f'User {user.username} assigned to Superuser group.'
-                )
+                msg = f'User {user.username} assigned to Superuser group.'
+                messages.success(request, msg)
 
             elif group_type == 'staff':
-                staff_group, created = Group.objects.get_or_create(name='Staff')
-                user.groups.add(staff_group)
+                group, created = Group.objects.get_or_create(name='Staff')
+                user.groups.add(group)
                 user.is_staff = True
                 user.is_superuser = False
-                messages.success(
-                    request,
-                    f'User {user.username} assigned to Staff group.'
-                )
+                msg = f'User {user.username} assigned to Staff group.'
+                messages.success(request, msg)
 
             elif group_type == 'regular':
-                regular_group, created = Group.objects.get_or_create(name='Regular')
-                user.groups.add(regular_group)
+                group, created = Group.objects.get_or_create(name='Regular')
+                user.groups.add(group)
                 user.is_staff = False
                 user.is_superuser = False
-                messages.success(
-                    request,
-                    f'User {user.username} assigned to Regular group.'
-                )
+                msg = f'User {user.username} assigned to Regular group.'
+                messages.success(request, msg)
 
             user.save()
 
@@ -291,19 +294,18 @@ class CustomUserAdmin(UserAdmin):
         # Filter out protected admin user
         queryset = queryset.exclude(username__iexact='admin')
 
-        admin_group, created = Group.objects.get_or_create(name='Admin')
+        group, created = Group.objects.get_or_create(name='Admin')
         for user in queryset:
             if user != request.user:  # Prevent self-modification
                 user.groups.clear()
-                user.groups.add(admin_group)
+                user.groups.add(group)
                 user.is_staff = True
                 user.is_superuser = True
                 user.save()
-        self.message_user(
-            request,
-            f'Successfully assigned {queryset.count()} users to Admin group.'
-        )
-    assign_admin_group.short_description = "Assign selected users to Admin group"
+        count = queryset.count()
+        msg = f'Successfully assigned {count} users to Admin group.'
+        self.message_user(request, msg)
+    assign_admin_group.short_description = "Assign to Admin group"
 
     def assign_superuser_group(self, request, queryset):
         """Assign selected users to Superuser group."""
@@ -317,19 +319,18 @@ class CustomUserAdmin(UserAdmin):
         # Filter out protected admin user
         queryset = queryset.exclude(username__iexact='admin')
 
-        superuser_group, created = Group.objects.get_or_create(name='Superuser')
+        group, created = Group.objects.get_or_create(name='Superuser')
         for user in queryset:
             if user != request.user:
                 user.groups.clear()
-                user.groups.add(superuser_group)
+                user.groups.add(group)
                 user.is_staff = True
                 user.is_superuser = True
                 user.save()
-        self.message_user(
-            request,
-            f'Successfully assigned {queryset.count()} users to Superuser group.'
-        )
-    assign_superuser_group.short_description = "Assign selected users to Superuser group"
+        count = queryset.count()
+        msg = f'Successfully assigned {count} users to Superuser group.'
+        self.message_user(request, msg)
+    assign_superuser_group.short_description = "Assign to Superuser group"
 
     def assign_staff_group(self, request, queryset):
         """Assign selected users to Staff group."""
@@ -343,19 +344,18 @@ class CustomUserAdmin(UserAdmin):
         # Filter out protected admin user
         queryset = queryset.exclude(username__iexact='admin')
 
-        staff_group, created = Group.objects.get_or_create(name='Staff')
+        group, created = Group.objects.get_or_create(name='Staff')
         for user in queryset:
             if user != request.user:
                 user.groups.clear()
-                user.groups.add(staff_group)
+                user.groups.add(group)
                 user.is_staff = True
                 user.is_superuser = False
                 user.save()
-        self.message_user(
-            request,
-            f'Successfully assigned {queryset.count()} users to Staff group.'
-        )
-    assign_staff_group.short_description = "Assign selected users to Staff group"
+        count = queryset.count()
+        msg = f'Successfully assigned {count} users to Staff group.'
+        self.message_user(request, msg)
+    assign_staff_group.short_description = "Assign to Staff group"
 
     def assign_regular_group(self, request, queryset):
         """Assign selected users to Regular group."""
@@ -369,19 +369,18 @@ class CustomUserAdmin(UserAdmin):
         # Filter out protected admin user
         queryset = queryset.exclude(username__iexact='admin')
 
-        regular_group, created = Group.objects.get_or_create(name='Regular')
+        group, created = Group.objects.get_or_create(name='Regular')
         for user in queryset:
             if user != request.user:
                 user.groups.clear()
-                user.groups.add(regular_group)
+                user.groups.add(group)
                 user.is_staff = False
                 user.is_superuser = False
                 user.save()
-        self.message_user(
-            request,
-            f'Successfully assigned {queryset.count()} users to Regular group.'
-        )
-    assign_regular_group.short_description = "Assign selected users to Regular group"
+        count = queryset.count()
+        msg = f'Successfully assigned {count} users to Regular group.'
+        self.message_user(request, msg)
+    assign_regular_group.short_description = "Assign to Regular group"
 
 
 class CustomGroupAdmin(admin.ModelAdmin):
@@ -456,7 +455,9 @@ class UserProfileAdmin(BaseAdmin):
 
     def get_queryset(self, request):
         """Exclude profiles of protected users."""
-        return super().get_queryset(request).exclude(user__username__iexact='admin')
+        return super().get_queryset(request).exclude(
+            user__username__iexact='admin'
+        )
 
     def has_view_permission(self, request, obj=None):
         """Check if user can view this profile."""
@@ -511,7 +512,9 @@ class SecurityQuestionAdmin(BaseAdmin):
 
     def get_queryset(self, request):
         """Exclude security questions of protected users."""
-        return super().get_queryset(request).exclude(user__username__iexact='admin')
+        return super().get_queryset(request).exclude(
+            user__username__iexact='admin'
+        )
 
     def has_view_permission(self, request, obj=None):
         """Check if user can view security questions."""
