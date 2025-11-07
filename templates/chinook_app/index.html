@@ -1,7 +1,5 @@
 {% extends "base.html" %}
-
 {% block title %}Home - 🎵 Chinook Music Database{% endblock %}
-
 {% block content %}
 <!-- Hero Section -->
 <div class="hero-section p-5 mb-4">
@@ -23,7 +21,6 @@
         </div>
     </div>
 </div>
-
 <!-- Statistics Cards -->
 <div class="row stats-section mb-5">
     <div class="col-md-4 mb-4">
@@ -34,7 +31,6 @@
                 </div>
                 <h2 class="stats-number display-4 fw-bold mb-2 text-white">{{ artists_count }}</h2>
                 <p class="h4 mb-3 text-white opacity-90">Artists</p>
-
 <a href="{% url 'all_artists' %}" class="btn btn-light btn-sm px-4 py-2 rounded-pill fw-semibold fs-6" style="color: #0056b3 !important;">
     View All <i class="fas fa-arrow-right ms-2"></i>
 </a>
@@ -49,16 +45,9 @@
                 </div>
                 <h2 class="stats-number display-4 fw-bold mb-2 text-white">{{ albums_count }}</h2>
                 <p class="h4 mb-3 text-white opacity-90">Albums</p>
-
-
-
-
-
                <a href="{% url 'all_albums' %}" class="btn btn-light btn-sm px-4 py-2 rounded-pill fw-semibold fs-6" style="color: #0056b3 !important;">
     View All <i class="fas fa-arrow-right ms-2"></i>
 </a>
-
-
             </div>
         </div>
     </div>
@@ -70,7 +59,6 @@
                 </div>
                 <h2 class="stats-number display-4 fw-bold mb-2 text-white">{{ tracks_count }}</h2>
                 <p class="h4 mb-3 text-white opacity-90">Tracks</p>
-
 <button class="btn btn-light btn-sm px-4 py-2 rounded-pill fw-semibold fs-6" style="color: #0056b3 !important;" data-bs-toggle="modal" data-bs-target="#tracksModal">
     View All <i class="fas fa-arrow-right ms-2"></i>
 </button>
@@ -78,7 +66,6 @@
         </div>
     </div>
 </div>
-
 <!-- Quick Actions & Recent Additions -->
 <div class="row mb-5">
     <div class="col-lg-4 mb-4">
@@ -109,7 +96,6 @@
             </div>
         </div>
     </div>
-
     <div class="col-lg-4 mb-4">
         <div class="card border-0 shadow-lg h-100">
             <div class="card-header bg-gradient-success text-white border-0 py-3">
@@ -155,7 +141,6 @@
             </div>
         </div>
     </div>
-
     <div class="col-lg-4 mb-4">
         <div class="card border-0 shadow-lg h-100">
             <div class="card-header bg-gradient-info text-white border-0 py-3">
@@ -200,7 +185,6 @@
         </div>
     </div>
 </div>
-
 <!-- Tracks Modal -->
 <div class="modal fade" id="tracksModal" tabindex="-1" aria-labelledby="tracksModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
@@ -289,7 +273,6 @@
         </div>
     </div>
 </div>
-
 <style>
     /* Enhanced Statistics Cards */
     .stats-card {
@@ -301,7 +284,6 @@
         align-items: center;
         justify-content: center;
     }
-
     .stats-card:nth-child(2) {
         background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
     }
@@ -309,7 +291,6 @@
     .stats-card:nth-child(3) {
         background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     }
-
     .stats-card:hover {
         transform: translateY(-10px) scale(1.02);
         box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25) !important;
@@ -324,7 +305,6 @@
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
-
     /* Quick Action Buttons */
     .quick-action-btn {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -333,37 +313,29 @@
         transition: all 0.3s ease;
         text-align: center;
     }
-
     .quick-action-btn:nth-child(2) {
         background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
     }
-
     .quick-action-btn:nth-child(3) {
         background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
     }
-
     .quick-action-btn:nth-child(4) {
         background: linear-gradient(135deg, #FFD166 0%, #FF9E64 100%);
     }
-
     .quick-action-btn:hover {
         transform: translateY(-3px);
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     }
-
     /* Card Headers */
     .bg-gradient-primary {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
     }
-
     .bg-gradient-success {
         background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%) !important;
     }
-
     .bg-gradient-info {
         background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
     }
-
     /* Explore Section */
     .explore-section {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
