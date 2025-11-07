@@ -13,10 +13,8 @@
 ## 📋 Project Overview
 The **Chinook Music Database** is a Django-based web application that enables users, administrators, and store owners to manage artists, albums, tracks, and playlists with full CRUD functionality. Built with Django, PostgreSQL, and Bootstrap, it offers secure authentication, advanced search, and a responsive, music-themed interface. Developed using agile methodology, it focuses on user-centered design, efficient data management, and accessibility across all devices.
 ---
-
 <p align="center"><img src="/static/images/home.png"></p>
 <h2 align="center"><a href="https://chinookmusicdbpro-1a8fd737fe52.herokuapp.com/">Website Link | <a href="https://github.com/users/arokhlo/projects/11/views/1">Project Board</a></h2>                                                                                                                                                           
----
 
 ## 🧭 Table of Contents
 - [User Stories](#user-stories)
@@ -337,6 +335,7 @@ python manage.py runserver
 - **Platform:** Heroku with PostgreSQL database
 - **Static Files:** WhiteNoise middleware with CDN optimization
 - **Environment:** Debug mode disabled, proper security configurations
+---
 
 ### Deployment Steps
 ```bash
@@ -356,7 +355,7 @@ heroku run python manage.py collectstatic
 DEBUG=False
 SECRET_KEY=django-insecure-chinook-secret-key-2024
 DATABASE_URL=postgresql://neondb_owner:npg_FgsZR9MWb8Sr@ep-long-dust-aggdj4tj.c-2.eu-central-1.aws.neon.tech/alive_smell_rank_585650
----
+```text
 
 ## 🤖 AI Implementation
 This project was developed with assistance from AI tools including GitHub Copilot, ChatGPT, and Canva AI. These tools supported development tasks such as Django view logic, form handling, URL configuration, debugging, and logo design. All AI-generated content was thoroughly reviewed, tested, and adapted to meet the project's specific requirements and quality standards.
