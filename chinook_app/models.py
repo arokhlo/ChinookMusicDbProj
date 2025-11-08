@@ -17,8 +17,10 @@ class SecurityQuestion(models.Model):
         ('father_name', '4. What is your father\'s name?'),
         ('favourite_colour', '5. What is your favourite colour?'),
     ]
-    
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
+    )
     question_1 = models.CharField(max_length=50, choices=QUESTION_CHOICES)
     answer_1 = models.CharField(max_length=255)
     question_2 = models.CharField(max_length=50, choices=QUESTION_CHOICES)
@@ -29,14 +31,12 @@ class SecurityQuestion(models.Model):
     answer_4 = models.CharField(max_length=255)
     question_5 = models.CharField(max_length=50, choices=QUESTION_CHOICES)
     answer_5 = models.CharField(max_length=255)
-    
+
     def __str__(self):
         return f"Security Questions for {self.user.username}"
-    
+
     def get_available_questions(self):
-        """
-        Returns a list of available questions that haven't been used yet
-        """
+        """Returns a list of available questions that haven't been used yet."""
         used_questions = [
             self.question_1,
             self.question_2,
@@ -45,15 +45,13 @@ class SecurityQuestion(models.Model):
             self.question_5,
         ]
         available_questions = [
-            (choice[0], choice[1]) for choice in self.QUESTION_CHOICES 
+            (choice[0], choice[1]) for choice in self.QUESTION_CHOICES
             if choice[0] not in used_questions
         ]
         return available_questions
-    
+
     def get_question_display(self, question_field):
-        """
-        Returns the display text for a question field
-        """
+        """Returns the display text for a question field."""
         question_value = getattr(self, question_field)
         for choice in self.QUESTION_CHOICES:
             if choice[0] == question_value:
@@ -68,14 +66,16 @@ def user_avatar_path(instance, filename):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    avatar = models.ImageField(upload_to=user_avatar_path, blank=True, null=True)
+    avatar = models.ImageField(
+        upload_to=user_avatar_path, blank=True, null=True
+    )
     bio = models.TextField(max_length=500, blank=True)
     location = models.CharField(max_length=30, blank=True)
     birth_date = models.DateField(null=True, blank=True)
-    
+
     def __str__(self):
         return f"{self.user.username}'s profile"
-    
+
     def save(self, *args, **kwargs):
         # Only try to delete old avatar if this instance already exists in DB
         if self.pk:
@@ -104,24 +104,26 @@ def save_user_profile(sender, instance, **kwargs):
 
 
 def send_admin_registration_notification(new_user):
-    """
-    Send email notification to admin when a new user registers
-    """
+    """Send email notification to admin when a new user registers."""
     try:
         admin_users = User.objects.filter(is_superuser=True)
-        
+
         for admin_user in admin_users:
             subject = f'New User Registration - {new_user.username}'
             context = {
                 'admin_username': admin_user.username,
                 'new_user': new_user,
-                'registration_date': new_user.date_joined.strftime('%Y-%m-%d %H:%M:%S'),
-                'admin_url': 'http://localhost:8000/admin/'  # Adjust this for production
+                'registration_date': new_user.date_joined.strftime(
+                    '%Y-%m-%d %H:%M:%S'
+                ),
+                'admin_url': 'http://localhost:8000/admin/'
             }
-            
-            html_message = render_to_string('admin/new_user_notification.html', context)
+
+            html_message = render_to_string(
+                'admin/new_user_notification.html', context
+            )
             plain_message = strip_tags(html_message)
-            
+
             send_mail(
                 subject=subject,
                 message=plain_message,
@@ -130,7 +132,7 @@ def send_admin_registration_notification(new_user):
                 html_message=html_message,
                 fail_silently=True,
             )
-            
+
     except Exception as e:
         # Log the error but don't break user registration
         print(f"Error sending admin notification: {e}")
@@ -151,7 +153,9 @@ class Artist(models.Model):
 class Album(models.Model):
     AlbumId = models.AutoField(primary_key=True)
     Title = models.CharField(max_length=160)
-    ArtistId = models.ForeignKey(Artist, on_delete=models.CASCADE, db_column='ArtistId')
+    ArtistId = models.ForeignKey(
+        Artist, on_delete=models.CASCADE, db_column='ArtistId'
+    )
 
     class Meta:
         db_table = 'Album'
@@ -164,7 +168,10 @@ class Album(models.Model):
 class Track(models.Model):
     TrackId = models.AutoField(primary_key=True)
     Name = models.CharField(max_length=200)
-    AlbumId = models.ForeignKey(Album, on_delete=models.CASCADE, db_column='AlbumId', null=True, blank=True)
+    AlbumId = models.ForeignKey(
+        Album, on_delete=models.CASCADE, db_column='AlbumId',
+        null=True, blank=True
+    )
     MediaTypeId = models.IntegerField()
     GenreId = models.IntegerField(null=True, blank=True)
     Composer = models.CharField(max_length=220, null=True, blank=True)
@@ -193,7 +200,7 @@ class Review(models.Model):
         (4, '★★★★'),
         (5, '★★★★★'),
     ]
-    
+
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
     track = models.ForeignKey(Track, on_delete=models.CASCADE)
     rating = models.IntegerField(choices=RATING_CHOICES)
@@ -205,4 +212,6 @@ class Review(models.Model):
         unique_together = ['user', 'track']
 
     def __str__(self):
-        return f"{self.user.username} - {self.track.Name} - {self.rating} stars"
+        username = self.user.username
+        track_name = self.track.Name
+        return f"{username} - {track_name} - {self.rating} stars"
