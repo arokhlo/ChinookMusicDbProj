@@ -8,12 +8,14 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ===== SECURITY SETTINGS =====
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-chinook-secret-key-2024')
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY', 'django-insecure-chinook-secret-key-2024'
+)
 DEBUG = False
 
 ALLOWED_HOSTS = [
     'chinookmusicdbpro.herokuapp.com',
-    'localhost', 
+    'localhost',
     '127.0.0.1',
     '.herokuapp.com'
 ]
@@ -28,14 +30,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    
+
     # Third-party apps
     'django_extensions',
     'allauth',
     'allauth.account',
     'crispy_forms',
     'crispy_bootstrap5',
-    
+
     # Local apps
     'chinook_app',
 ]
@@ -102,16 +104,20 @@ else:
 # ===== PASSWORD VALIDATION =====
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.auth.password_validation.'
+                'UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': 'django.contrib.auth.password_validation.'
+                'MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation.'
+                'CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation.'
+                'NumericPasswordValidator',
     },
 ]
 
@@ -125,7 +131,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = (
+    'whitenoise.storage.CompressedManifestStaticFilesStorage'
+)
 
 # ===== MEDIA FILES =====
 MEDIA_URL = '/media/'
@@ -146,21 +154,29 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'your-email@gmail.com')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'your-app-password')
+EMAIL_HOST_USER = os.environ.get(
+    'EMAIL_HOST_USER', 'your-email@gmail.com'
+)
+EMAIL_HOST_PASSWORD = os.environ.get(
+    'EMAIL_HOST_PASSWORD', 'your-app-password'
+)
 
 # Default from email
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@chinookmusic.com')
+DEFAULT_FROM_EMAIL = os.environ.get(
+    'DEFAULT_FROM_EMAIL', 'noreply@chinookmusic.com'
+)
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 ADMINS = [
-    ('Admin', os.environ.get('ADMIN_EMAIL', 'admin@chinookmusic.com')),
+    ('Admin', os.environ.get(
+        'ADMIN_EMAIL', 'admin@chinookmusic.com'
+    )),
 ]
 
 # ===== DJANGO ALLAUTH CONFIGURATION =====
 # Use security questions instead of email for password reset
 ACCOUNT_AUTHENTICATION_METHOD = 'username'
 ACCOUNT_EMAIL_REQUIRED = False
-ACCOUNT_EMAIL_VERIFICATION = 'none'  # Completely disable email verification
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 # Security question password reset settings
 ACCOUNT_LOGOUT_ON_GET = True

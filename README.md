@@ -143,75 +143,32 @@ Wireframes were designed to visualize the core structure:
 | Security Questions | Password reset works | ✅ PASS |
 | Search Functionality | Users can search content | ✅ PASS |
 
-11111111111111111111111111111111111111111111111111111111111111111111111111111111111111
 <h2 id="python-validation">Python Validation</h2>
 
 All pages are clear of any errors and pass PEP8 standard:
 
-<h2>Admin views:</h2>
+<h2>Admin:</h2>
 <br>
-<img src="/static/images/admin_views.png">
+<img src="/static/images/py/admin-PyValidation.png">
 <br><br>
 
-<h2>Developer Models:</h2>
+<h2>Models:</h2>
 <br>
-<img src="/static/images/developer_models.png">
+<img src="/static/images/py/models-PyValidation.png">
 <br><br>
 
-<h2>Developer URLs:</h2>
+<h2>URLs:</h2>
 <br>
-<img src="/static/images/developer_urls.png">
+<img src="/static/images/py/urls-PyValidation.png">
 <br><br>
 
-<h2>Developer Views:</h2>
+<h2>Forms:</h2>
 <br>
-<img src="/static/images/developer_views.png">
+<img src="/static/images/py/forms-PyValidation.png">
 <br><br>
 
-<h2>Home URLs:</h2>
-<br>
-<img src="/static/images/home_urls.png">
-<br><br>
+11111111111111111111111111111111111111111111111111111111111111111111111111111111111111
 
-<h2>Home Views:</h2>
-<br>
-<img src="/static/images/home_views.png">
-<br><br>
-
-<h2>IGDB Service:</h2>
-<br>
-<img src="/static/images/igdb_service.png">
-<br><br>
-
-<h2>Populate Reviews:</h2>
-<br>
-<img src="/static/images/populate_reviews.png">
-<br><br>
-
-<h2>Populate Models:</h2>
-<br>
-<img src="/static/images/publisher_models.png">
-<br><br>
-
-<h2>Publisher Models:</h2>
-<br>
-<img src="/static/images/publisher_models.png">
-<br><br>
-
-<h2>Publisher URLs:</h2>
-<br>
-<img src="/static/images/publisher_urls.png">
-<br><br>
-
-<h2>Publisher Views:</h2>
-<br>
-<img src="/static/images/publisher_views.png">
-<br><br>
-
-<h2>Review Models:</h2>
-<br>
-<img src="/static/images/reviews_models.png">
-<br><br>
 
 <h2>Review URLs:</h2>
 <br>
@@ -358,7 +315,14 @@ DATABASE_URL=postgresql://neondb_owner:npg_FgsZR9MWb8Sr@ep-long-dust-aggdj4tj.c-
 ```
 
 ## 🤖 AI Implementation
-This project was developed with assistance from AI tools including GitHub Copilot, ChatGPT, and Canva AI. These tools supported development tasks such as Django view logic, form handling, URL configuration, debugging, and logo design. All AI-generated content was thoroughly reviewed, tested, and adapted to meet the project's specific requirements and quality standards.
+
+This project was developed with the assistance of AI tools, including GitHub Copilot, ChatGPT, and Canva AI. These tools supported various stages of development such as Django view logic, form handling, URL configuration, debugging, and visual design tasks like imagery and logo creation.
+<ul>
+<li>
+AI proved to be an invaluable resource throughout the project, helping to identify and resolve functionality issues efficiently and suggesting alternative approaches when needed. It also served as an effective learning aid by explaining complex code behavior and enhancing understanding of Django concepts.</li>
+<li>
+All AI-assisted outputs were carefully reviewed, tested, and refined to ensure accuracy, maintain project integrity, and meet the required quality standards.</li>
+</ul>
 ---
 
 ## 🏆 Credits
