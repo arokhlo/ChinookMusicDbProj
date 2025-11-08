@@ -167,19 +167,6 @@ All pages are clear of any errors and pass PEP8 standard:
 <img src="/static/images/py/forms-PyValidation.png">
 <br><br>
 
-11111111111111111111111111111111111111111111111111111111111111111111111111111111111111
-
-
-<h2>Review URLs:</h2>
-<br>
-<img src="/static/images/reviews_urls.png">
-<br><br>
-
-<h2>Review Views:</h2>
-<br>
-<img src="/static/images/reviews_views.png">
-<br><br>
-
 <h2 id="html-validation">HTML Validation</h2>
 HTML Validation passes successfully with no errors, I have only shown the one index.html validation for brevity given the amount of pages validated. The following pages were all checked and clear of any errors:
 <br><br>
@@ -207,8 +194,56 @@ password_reset_from_questions.html<br>
 security_question_reset.html<br>
 security_question_verify.html<br>
 
+<h2>base.html:</h2>
+<br>
+<img src="/static/images/base-Validation.png">
+<br><br>
+
 <br><br>
 <img src="/static/images/py/index_validartion.png" alt="HTML Validation">
+<br>
+<br><br>
+<img src="/static/images/change_password.png" alt="Change Password">
+<br>
+
+<br><br>
+<img src="/static/images/password_reset_from_questions.png" alt="Password Reset">
+<br>
+<br><br>
+<img src="/static/images/sign-up.png" alt="Sign-up">
+<br>
+<br><br>
+<img src="/static/images/artists.png" alt="Artists list">
+<br>
+<br><br>
+<img src="/static/images/albums.png" alt="Albums list">
+<br>
+<br><br>
+<img src="/static/images/profile-Validation.png" alt="Profile Validation">
+<br>
+<br><br>
+<img src="/static/images/update_album.png" alt="Update Album">
+<br>
+<br><br>
+<img src="/static/images/delete_album.png" alt="Delete Album">
+<br>
+<br><br>
+<img src="/static/images/user_management.png" alt="User Management">
+<br>
+<br><br>
+<img src="/static/images/security_question_verify.png" alt="Security Question">
+<br>
+<br><br>
+<img src="/static/images/security_question_verify.png" alt="Security Question Verify">
+<br>
+<br><br>
+<img src="/static/images/security_question_reset.png" alt="Security Question Reset">
+<br>
+<br><br>
+<img src="/static/images/login.png" alt="Login">
+<br>
+<br><br>
+<img src="/static/images/search_track.png" alt="Search Track">
 <br>
 
 <h2 id="css-validation">CSS Validation</h2>
@@ -216,15 +251,11 @@ CSS Validation passes successfully with no errors, there are some warnings for u
 <br><br>
 <img src="/static/images/css.png" alt="CSS Validation">
 <br>
-
-
 <h2 id="lighthouse">Lighthouse</h2>
 Lighthouse scores 94% for perforamnce. Best practices scores 100%. This is due to Cloudinary serving the game cover images that are stored via HTTP rather than HTTPS:
 <br><br>
-<img src="/static/images/py/lighthouse.png" alt="Lighthouse Score">
+<img src="/static/images/lighthouse.png" alt="Lighthouse Score">
 <br>
-
-111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
 
 ### Automated Testing
 ```bash

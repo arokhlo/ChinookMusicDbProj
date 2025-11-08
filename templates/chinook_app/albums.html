@@ -30,21 +30,20 @@
                                         {% for group in user.groups.all %}
                                             {% if group.name == 'Admin' or group.name == 'Superuser' or group.name == 'Staff' %}
                                                 <a href="{% url 'delete_album_frontend' album.AlbumId %}" 
-                                                   class="btn btn-danger btn-sm"
-                                                   onclick="return confirm('Are you sure you want to delete the album \"{{ album.Title }}\"? This action cannot be undone.')">
-                                                    <i class="fas fa-trash"></i> Delete
+                                                   class="btn btn-danger btn-sm delete-btn"
+                                                   data-album-title="{{ album.Title }}">
+                                                    <i class="fas fa-trash" aria-hidden="true"></i> Delete
                                                 </a>
                                             {% endif %}
                                         {% endfor %}
                                     {% else %}
-                                        <button class="btn btn-secondary btn-sm" disabled 
-                                                onclick="alert('This option is disabled for you. Please contact Admin.')">
-                                            <i class="fas fa-trash"></i> Delete
+                                        <button class="btn btn-secondary btn-sm" disabled>
+                                            <i class="fas fa-trash" aria-hidden="true"></i> Delete
                                         </button>
                                     {% endif %}
                                 {% else %}
                                     <a href="{% url 'account_login' %}" class="btn btn-outline-secondary btn-sm">
-                                        <i class="fas fa-sign-in-alt"></i> Login to Manage
+                                        <i class="fas fa-sign-in-alt" aria-hidden="true"></i> Login to Manage
                                     </a>
                                 {% endif %}
                             </td>
@@ -88,10 +87,30 @@
         {% if user.is_authenticated %}
         <div class="mt-4">
             <a href="{% url 'add_album' %}" class="btn btn-success">
-                <i class="fas fa-plus"></i> Add New Album
+                <i class="fas fa-plus" aria-hidden="true"></i> Add New Album
             </a>
         </div>
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click event listeners to delete buttons
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+    
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const albumTitle = this.getAttribute('data-album-title');
+            const confirmation = confirm('Are you sure you want to delete the album "' + albumTitle + '"? This action cannot be undone.');
+            
+            if (!confirmation) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
