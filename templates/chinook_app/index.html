@@ -1,13 +1,16 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Home - 🎵 Chinook Music Database{% endblock %}
 {% block content %}
 
 <!-- Hero Section -->
-<div class="hero-section p-5 mb-4">
+<section class="hero-section p-5 mb-4">
     <div class="row align-items-center">
         <div class="col-lg-8">
             <h1 class="hero-title fw-bold mb-3">🎵 Welcome to Chinook Music</h1>
-            <p class="lead mb-4">Discover, manage, and explore your music collection with our powerful database platform.</p>
+            <p class="lead mb-4">
+                Discover, manage, and explore your music collection with our powerful database platform.
+            </p>
             <div class="d-flex gap-3 flex-wrap">
                 <a href="{% url 'all_artists' %}" class="btn btn-light btn-lg px-4">
                     <i class="fas fa-users me-2"></i>Browse Artists
@@ -18,56 +21,58 @@
             </div>
         </div>
         <div class="col-lg-4 text-center">
-            <i class="fas fa-music" style="font-size: 8rem; opacity: 0.8;"></i>
+            <i class="fas fa-music" aria-hidden="true" style="font-size: 8rem; opacity: 0.8;"></i>
         </div>
     </div>
-</div>
+</section>
 
 <!-- Statistics Cards -->
-<div class="row stats-section mb-5">
+<section class="row stats-section mb-5">
     {% for stat in stats %}
     <div class="col-md-4 mb-4">
         <div class="card stats-card text-white shadow-lg border-0">
             <div class="card-body text-center p-4">
                 <div class="stats-icon mb-3">
-                    <i class="{{ stat.icon }} fa-3x text-white opacity-90"></i>
+                    <i class="{{ stat.icon }} fa-3x text-white opacity-90" aria-hidden="true"></i>
                 </div>
                 <h2 class="stats-number display-4 fw-bold mb-2 text-white">{{ stat.count }}</h2>
                 <p class="h4 mb-3 text-white opacity-90">{{ stat.label }}</p>
                 <a href="{{ stat.url }}" class="btn btn-light btn-sm px-4 py-2 rounded-pill fw-semibold fs-6 text-primary">
-                    View All <i class="fas fa-arrow-right ms-2"></i>
+                    View All <i class="fas fa-arrow-right ms-2" aria-hidden="true"></i>
                 </a>
             </div>
         </div>
     </div>
     {% endfor %}
-</div>
+</section>
 
 <!-- Recent Albums, Tracks, and Quick Actions -->
-<div class="row mb-5">
+<section class="row mb-5">
     {% include 'partials/recent_albums.html' %}
     {% include 'partials/recent_tracks.html' %}
     {% include 'partials/quick_actions.html' %}
-</div>
+</section>
 
 <!-- Explore Section -->
-<div class="row mt-5">
+<section class="row mt-5">
     <div class="col-12">
         <div class="card border-0 shadow-lg explore-section">
             <div class="card-body text-center py-5">
                 <h2 class="explore-title display-5 fw-bold mb-3">🎶 Ready to Explore Your Music World?</h2>
-                <p class="explore-text lead mb-4">Start your musical journey with our comprehensive database featuring thousands of artists, albums, and tracks.</p>
+                <p class="explore-text lead mb-4">
+                    Start your musical journey with our comprehensive database featuring thousands of artists, albums, and tracks.
+                </p>
                 <div class="d-flex justify-content-center gap-4 flex-wrap">
                     <a href="{% url 'all_artists' %}" class="btn explore-btn btn-light btn-lg rounded-pill px-5 py-3 fw-semibold">
-                        <i class="fas fa-star me-2"></i>Discover Artists
+                        <i class="fas fa-star me-2" aria-hidden="true"></i>Discover Artists
                     </a>
                     <a href="{% url 'all_albums' %}" class="btn explore-btn btn-light btn-lg rounded-pill px-5 py-3 fw-semibold">
-                        <i class="fas fa-gem me-2"></i>Explore Albums
+                        <i class="fas fa-gem me-2" aria-hidden="true"></i>Explore Albums
                     </a>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
 {% endblock %}
