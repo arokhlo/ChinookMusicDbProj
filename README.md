@@ -184,49 +184,43 @@ signup.html<br>
 password_reset_from_questions.html<br>
 security_question_reset.html<br>
 security_question_verify.html<br>
-
 <h2>base.html:</h2>
 <img src="/static/images/base-Validation.png">
 <h2>index.html:</h2>
-<img src="/static/images/py/index_validartion.png" alt="HTML Validation">
-<h2>index.html:</h2>
+<img src="/static/images/index_validartion.png" alt="HTML Validation">
+<h2>change_password.html:</h2>
 <img src="/static/images/change_password.png" alt="Change Password">
-<br><br>
+<h2>password_reset_from_questions.html:</h2>
 <img src="/static/images/password_reset_from_questions.png" alt="Password Reset">
-<br><br>
+<h2>Sign-Up.html:</h2>
 <img src="/static/images/sign-up.png" alt="Sign-up">
-<br><br>
+<h2>Artists.html:</h2>
 <img src="/static/images/artists.png" alt="Artists list">
-<br><br>
+<h2>albums.html:</h2>
 <img src="/static/images/albums.png" alt="Albums list">
-<br><br>
+<h2>profile.html:</h2>
 <img src="/static/images/profile-Validation.png" alt="Profile Validation">
-<br><br>
+<h2>update_album.html:</h2>
 <img src="/static/images/update_album.png" alt="Update Album">
-<br><br>
+<h2>delete_album.html:</h2>
 <img src="/static/images/delete_album.png" alt="Delete Album">
-<br><br>
+<h2>user_management.html:</h2>
 <img src="/static/images/user_management.png" alt="User Management">
-<br><br>
+<h2>security_question_verify.html:</h2>
 <img src="/static/images/security_question_verify.png" alt="Security Question">
-<br><br>
-<img src="/static/images/security_question_verify.png" alt="Security Question Verify">
-<br><br>
+<h2>security_question_reset.html:</h2>
 <img src="/static/images/security_question_reset.png" alt="Security Question Reset">
-<br><br>
+<h2>login.html:</h2>
 <img src="/static/images/login.png" alt="Login">
-<br><br>
+<h2>search_track.html:</h2>
 <img src="/static/images/search_track.png" alt="Search Track">
 <br>
-
 <h2 id="css-validation">CSS Validation</h2>
 CSS Validation passes successfully with no errors, there are some warnings for using webkit within the CSS as this is a vendor specific code:
-<br><br>
 <img src="/static/images/css.png" alt="CSS Validation">
 <br>
-<h2 id="lighthouse">Lighthouse</h2>
+<h2>Lighthouse Validation:</h2>
 Lighthouse scores 99% for perforamnce. Best practices scores 100%. This is due to Cloudinary serving the game cover images that are stored via HTTP rather than HTTPS:
-<br><br>
 <img src="/static/images/lighthouse.png" alt="Lighthouse Score">
 <br>
 
