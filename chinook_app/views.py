@@ -323,7 +323,6 @@ def user_management(request):
         'superusers': superusers
     })
 
-
 @login_required
 def delete_album_frontend(request, album_id):
     """Front-end album deletion with confirmation."""
@@ -332,16 +331,12 @@ def delete_album_frontend(request, album_id):
     if request.method == 'POST':
         # Check if album has tracks
         if Track.objects.filter(AlbumId=album_id).exists():
-            messages.error(
-                request, 'Cannot delete album with existing tracks.'
-            )
+            messages.error(request, 'Cannot delete album with existing tracks.')
             return redirect('all_albums')
 
         album_title = album.Title
         album.delete()
-        messages.success(
-            request, f'Album "{album_title}" deleted successfully!'
-        )
+        messages.success(request, f'Album "{album_title}" deleted successfully!')
         return redirect('all_albums')
 
     return render(request, 'chinook_app/delete_confirm.html', {
