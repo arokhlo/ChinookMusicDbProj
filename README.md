@@ -60,8 +60,6 @@ The **Chinook Music Database** is a Django-based web application that enables us
 - High contrast and vibrant accents for readability and engagement  
 - Fully responsive across all devices  
 
-![Colours](static/images/axmortaza.png)
-
 ### 🖼️ Wireframes
 Wireframes were designed to visualize the core structure:
 - Homepage – Featured music & catalog navigation  
@@ -147,7 +145,6 @@ Wireframes were designed to visualize the core structure:
 All pages are clear of any errors and pass PEP8 standard:
 
 <h2>Admin:</h2>
-<br>
 <img src="/static/images/py/admin-PyValidation.png">
 <br>
 <h2>Models:</h2>
@@ -190,9 +187,9 @@ security_question_verify.html<br>
 
 <h2>base.html:</h2>
 <img src="/static/images/base-Validation.png">
-<br><br>
+<h2>index.html:</h2>
 <img src="/static/images/py/index_validartion.png" alt="HTML Validation">
-<br><br>
+<h2>index.html:</h2>
 <img src="/static/images/change_password.png" alt="Change Password">
 <br><br>
 <img src="/static/images/password_reset_from_questions.png" alt="Password Reset">
