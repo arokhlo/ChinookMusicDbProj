@@ -187,7 +187,7 @@ security_question_verify.html<br>
 <h2>base.html:</h2>
 <img src="/static/images/base-Validation.png">
 <h2>index.html:</h2>
-<img src="/static/images/index_validartion.png" alt="HTML Validation">
+<img src="/static/images/index-Validation.png" alt="HTML Validation">
 <h2>change_password.html:</h2>
 <img src="/static/images/change_password.png" alt="Change Password">
 <h2>password_reset_from_questions.html:</h2>
