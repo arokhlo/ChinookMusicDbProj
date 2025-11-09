@@ -348,7 +348,6 @@ def delete_album_frontend(request, album_id):
         'object': album
     })
 
-
 @login_required
 def delete_artist_frontend(request, artist_id):
     """Front-end artist deletion with confirmation."""
@@ -357,22 +356,17 @@ def delete_artist_frontend(request, artist_id):
     if request.method == 'POST':
         # Check if artist has albums
         if Album.objects.filter(ArtistId=artist_id).exists():
-            messages.error(
-                request, 'Cannot delete artist with existing albums.'
-            )
+            messages.error(request, 'Cannot delete artist with existing albums.')
             return redirect('all_artists')
 
         artist_name = artist.Name
         artist.delete()
-        messages.success(
-            request, f'Artist "{artist_name}" deleted successfully!'
-        )
+        messages.success(request, f'Artist "{artist_name}" deleted successfully!')
         return redirect('all_artists')
 
     return render(request, 'chinook_app/delete_confirm.html', {
         'object': artist
     })
-
 
 @method_decorator(csrf_protect, name='dispatch')
 class SecurityQuestionVerificationView(View):
@@ -903,7 +897,6 @@ def update_album(request):
         'albums': albums,
         'selected_album': selected_album
     })
-
 
 # ===== DELETE OPERATIONS =====
 @login_required

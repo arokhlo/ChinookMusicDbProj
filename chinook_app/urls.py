@@ -66,6 +66,10 @@ urlpatterns = [
     path('delete-artist/', views.delete_artist, name='delete_artist'),
     path('delete-album/', views.delete_album, name='delete_album'),
 
+    # Frontend delete URLs (if you want separate endpoints)
+    path('artist/<int:artist_id>/delete/', views.delete_artist_frontend, name='delete_artist_frontend'),
+    path('album/<int:album_id>/delete/', views.delete_album_frontend, name='delete_album_frontend'),
+ 
     # ===== TRACK & REVIEW SYSTEM =====
     path('track/<int:track_id>/', views.track_detail, name='track_detail'),
     path(
