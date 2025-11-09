@@ -107,9 +107,8 @@ Wireframes were designed to visualize the core structure:
 
 <br>
 <img src="/static/images/projectboard.png">
-<br>
 <a href="https://github.com/users/arokhlo/projects/11/views/1">Project Board</a>
-<br><br>
+<br>
 
 ### Epics & Milestones
 - **User Authentication & Security:** Secure login, registration, and password recovery
@@ -150,22 +149,17 @@ All pages are clear of any errors and pass PEP8 standard:
 <h2>Admin:</h2>
 <br>
 <img src="/static/images/py/admin-PyValidation.png">
-<br><br>
-
-<h2>Models:</h2>
 <br>
+<h2>Models:</h2>
 <img src="/static/images/py/models-PyValidation.png">
-<br><br>
+<br>
 
 <h2>URLs:</h2>
-<br>
 <img src="/static/images/py/urls-PyValidation.png">
-<br><br>
-
-<h2>Forms:</h2>
 <br>
+<h2>Forms:</h2>
 <img src="/static/images/py/forms-PyValidation.png">
-<br><br>
+<br>
 
 <h2 id="html-validation">HTML Validation</h2>
 HTML Validation passes successfully with no errors, I have only shown the one index.html validation for brevity given the amount of pages validated. The following pages were all checked and clear of any errors:
@@ -195,53 +189,35 @@ security_question_reset.html<br>
 security_question_verify.html<br>
 
 <h2>base.html:</h2>
-<br>
 <img src="/static/images/base-Validation.png">
 <br><br>
-
-<br><br>
 <img src="/static/images/py/index_validartion.png" alt="HTML Validation">
-<br>
 <br><br>
 <img src="/static/images/change_password.png" alt="Change Password">
-<br>
-
 <br><br>
 <img src="/static/images/password_reset_from_questions.png" alt="Password Reset">
-<br>
 <br><br>
 <img src="/static/images/sign-up.png" alt="Sign-up">
-<br>
 <br><br>
 <img src="/static/images/artists.png" alt="Artists list">
-<br>
 <br><br>
 <img src="/static/images/albums.png" alt="Albums list">
-<br>
 <br><br>
 <img src="/static/images/profile-Validation.png" alt="Profile Validation">
-<br>
 <br><br>
 <img src="/static/images/update_album.png" alt="Update Album">
-<br>
 <br><br>
 <img src="/static/images/delete_album.png" alt="Delete Album">
-<br>
 <br><br>
 <img src="/static/images/user_management.png" alt="User Management">
-<br>
 <br><br>
 <img src="/static/images/security_question_verify.png" alt="Security Question">
-<br>
 <br><br>
 <img src="/static/images/security_question_verify.png" alt="Security Question Verify">
-<br>
 <br><br>
 <img src="/static/images/security_question_reset.png" alt="Security Question Reset">
-<br>
 <br><br>
 <img src="/static/images/login.png" alt="Login">
-<br>
 <br><br>
 <img src="/static/images/search_track.png" alt="Search Track">
 <br>
@@ -252,7 +228,7 @@ CSS Validation passes successfully with no errors, there are some warnings for u
 <img src="/static/images/css.png" alt="CSS Validation">
 <br>
 <h2 id="lighthouse">Lighthouse</h2>
-Lighthouse scores 94% for perforamnce. Best practices scores 100%. This is due to Cloudinary serving the game cover images that are stored via HTTP rather than HTTPS:
+Lighthouse scores 99% for perforamnce. Best practices scores 100%. This is due to Cloudinary serving the game cover images that are stored via HTTP rather than HTTPS:
 <br><br>
 <img src="/static/images/lighthouse.png" alt="Lighthouse Score">
 <br>
@@ -284,7 +260,6 @@ python manage.py test accounts
 - **PostgreSQL Integration** - Production database optimization
 - **Custom Admin Interface** - Enhanced Django admin with filters
 - **Heroku Deployment** - Production-ready deployment configuration
----
 
 ## 🛠️ Installation & Setup
 
@@ -323,7 +298,6 @@ python manage.py runserver
 - **Platform:** Heroku with PostgreSQL database
 - **Static Files:** WhiteNoise middleware with CDN optimization
 - **Environment:** Debug mode disabled, proper security configurations
----
 
 ### Deployment Steps
 ```bash
