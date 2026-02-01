@@ -2,25 +2,20 @@ import os
 import random
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
-from django.db.models import Q, Count, Avg
+from django.db.models import Q, Avg
 from django.core.paginator import Paginator
 from django.db import connection
 from django.contrib.auth.models import User
 from django.contrib.auth import (
     get_user_model, login, update_session_auth_hash
 )
-from django.contrib.auth.views import (
-    PasswordResetView, PasswordResetConfirmView
-)
+from django.contrib.auth.views import PasswordResetView
 from django.urls import reverse_lazy
-from django.views.generic import FormView, View
+from django.views.generic import View
 from django.views.decorators.csrf import csrf_protect
 from django.utils.decorators import method_decorator
-from allauth.account.views import LoginView
 from django.contrib.auth.decorators import user_passes_test
-from django.core.exceptions import PermissionDenied
 from django.contrib.auth.forms import PasswordChangeForm
 from .models import Artist, Album, Track, Review, UserProfile, SecurityQuestion
 from .forms import (
@@ -31,6 +26,39 @@ from .forms import (
 )
 
 User = get_user_model()
+
+
+def admin_required(function=None):
+    """Decorator for views that checks if the user is in Admin group."""
+    actual_decorator = user_passes_test(
+        lambda u: u.is_authenticated and u.groups.filter(
+            name='Admin'
+        ).exists(),
+        login_url='/accounts/login/'
+    )
+    if function:
+        return actual_decorator(function)
+    return actual_decorator
+
+
+def staff_required(function=None):
+    """Decorator for views that checks if the user is in Staff group."""
+    actual_decorator = user_passes_test(
+        lambda u: u.is_authenticated and u.groups.filter(
+            name='Staff'
+        ).exists(),
+        login_url='/accounts/login/'
+    )
+    if function:
+        return actual_decorator(function)
+    return actual_decorator
+
+
+def can_delete_content(user):
+    """Check if user has permission to delete content."""
+    return user.is_authenticated and (
+        user.groups.filter(name__in=['Admin', 'Superuser', 'Staff']).exists()
+    )
 
 
 # ===== SECURITY QUESTION PASSWORD CHANGE VIEW =====
@@ -226,52 +254,6 @@ class SecurityQuestionPasswordResetView(View):
         return render(request, self.template_name, {'form': form})
 
 
-def admin_required(function=None):
-    """Decorator for views that checks if the user is in Admin group."""
-    actual_decorator = user_passes_test(
-        lambda u: u.is_authenticated and u.groups.filter(
-            name='Admin'
-        ).exists(),
-        login_url='/accounts/login/'
-    )
-    if function:
-        return actual_decorator(function)
-    return actual_decorator
-
-
-def superuser_required(function=None):
-    """Decorator for views that checks if the user is in Superuser group."""
-    actual_decorator = user_passes_test(
-        lambda u: u.is_authenticated and u.groups.filter(
-            name='Superuser'
-        ).exists(),
-        login_url='/accounts/login/'
-    )
-    if function:
-        return actual_decorator(function)
-    return actual_decorator
-
-
-def staff_required(function=None):
-    """Decorator for views that checks if the user is in Staff group."""
-    actual_decorator = user_passes_test(
-        lambda u: u.is_authenticated and u.groups.filter(
-            name='Staff'
-        ).exists(),
-        login_url='/accounts/login/'
-    )
-    if function:
-        return actual_decorator(function)
-    return actual_decorator
-
-
-def can_delete_content(user):
-    """Check if user has permission to delete content."""
-    return user.is_authenticated and (
-        user.groups.filter(name__in=['Admin', 'Superuser', 'Staff']).exists()
-    )
-
-
 @admin_required
 def user_management(request):
     """User management page - only accessible by Admin users."""
@@ -323,7 +305,9 @@ def user_management(request):
         'superusers': superusers
     })
 
+
 @login_required
+@staff_required
 def delete_album_frontend(request, album_id):
     """Front-end album deletion with confirmation."""
     album = get_object_or_404(Album, AlbumId=album_id)
@@ -343,7 +327,9 @@ def delete_album_frontend(request, album_id):
         'object': album
     })
 
+
 @login_required
+@staff_required
 def delete_artist_frontend(request, artist_id):
     """Front-end artist deletion with confirmation."""
     artist = get_object_or_404(Artist, ArtistId=artist_id)
@@ -362,6 +348,7 @@ def delete_artist_frontend(request, artist_id):
     return render(request, 'chinook_app/delete_confirm.html', {
         'object': artist
     })
+
 
 @method_decorator(csrf_protect, name='dispatch')
 class SecurityQuestionVerificationView(View):
@@ -484,9 +471,6 @@ class QuestionBasedPasswordResetView(View):
                 # Clear session data
                 self._clear_reset_session()
 
-                # Update session auth hash if the user is logging in
-                update_session_auth_hash(request, user)
-
                 messages.success(
                     self.request,
                     'Your password has been reset successfully! '
@@ -536,13 +520,6 @@ class CustomPasswordResetView(PasswordResetView):
                 )
 
         return self.form_invalid(form)
-
-
-# ===== AUTHENTICATION VIEWS =====
-class CustomLoginView(LoginView):
-    """Custom login view using our custom form."""
-
-    form_class = CustomLoginForm
 
 
 # ===== USER PROFILE VIEWS =====
@@ -893,8 +870,10 @@ def update_album(request):
         'selected_album': selected_album
     })
 
+
 # ===== DELETE OPERATIONS =====
 @login_required
+@staff_required
 def delete_artist(request):
     """Delete artist from the database (with validation)."""
     artists = Artist.objects.all().order_by('Name')
@@ -937,6 +916,7 @@ def delete_artist(request):
 
 
 @login_required
+@staff_required
 def delete_album(request):
     """Delete album from the database (with validation)."""
     albums = Album.objects.select_related('ArtistId').all().order_by('Title')

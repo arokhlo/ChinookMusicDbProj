@@ -1,18 +1,15 @@
-# Virtual environments
-venv/
-env/
-.venv/
-
-# Python
-__pycache__/
+# Django
 *.pyc
-*.pyo
-*.pyd
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
 .Python
-
-# Environment variables
-.env
-.env.local
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
 # Database
 *.sqlite3
@@ -21,17 +18,52 @@ __pycache__/
 # Static files
 staticfiles/
 media/
+*.jpg
+*.png
+*.gif
+*.ico
+
+# Environment variables
+.env
+.env.local
+.env.dev
+.env.prod
+.env.sh
+.envrc
+.env.*
+
+# Secrets
+secrets.json
+config.json
+credentials.json
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# OS
+*~
 .DS_Store
 Thumbs.db
 
-# Django
+# Coverage
+.coverage
+htmlcov/
+.coverage.*
+.pytest_cache/
+
+# Logs
 *.log
-local_settings.py
+logs/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Heroku
+*.heroku

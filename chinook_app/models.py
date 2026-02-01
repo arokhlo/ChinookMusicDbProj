@@ -10,6 +10,9 @@ from django.utils.html import strip_tags
 
 
 class SecurityQuestion(models.Model):
+    """
+    Security questions for user authentication and password recovery.
+    """
     QUESTION_CHOICES = [
         ('birth_year', '1. What is your birth year?'),
         ('father_birth_year', '2. What is your father\'s birth year?'),
@@ -60,11 +63,13 @@ class SecurityQuestion(models.Model):
 
 
 def user_avatar_path(instance, filename):
+    """Generate file path for user avatar upload."""
     # File will be uploaded to MEDIA_ROOT/avatars/user_<id>/<filename>
     return f'avatars/user_{instance.user.id}/{filename}'
 
 
 class UserProfile(models.Model):
+    """Extended user profile information."""
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.ImageField(
         upload_to=user_avatar_path, blank=True, null=True
@@ -77,7 +82,7 @@ class UserProfile(models.Model):
         return f"{self.user.username}'s profile"
 
     def save(self, *args, **kwargs):
-        # Only try to delete old avatar if this instance already exists in DB
+        # Delete old avatar file when a new one is uploaded
         if self.pk:
             try:
                 old = UserProfile.objects.get(pk=self.pk)
@@ -91,6 +96,7 @@ class UserProfile(models.Model):
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
+    """Create UserProfile when a new User is created."""
     if created:
         UserProfile.objects.create(user=instance)
         # Send notification to admin about new user registration
@@ -99,6 +105,7 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
+    """Save UserProfile when User is saved."""
     if hasattr(instance, 'userprofile'):
         instance.userprofile.save()
 
@@ -139,6 +146,7 @@ def send_admin_registration_notification(new_user):
 
 
 class Artist(models.Model):
+    """Artist model representing music artists."""
     ArtistId = models.AutoField(primary_key=True)
     Name = models.CharField(max_length=120)
 
@@ -151,6 +159,7 @@ class Artist(models.Model):
 
 
 class Album(models.Model):
+    """Album model representing music albums."""
     AlbumId = models.AutoField(primary_key=True)
     Title = models.CharField(max_length=160)
     ArtistId = models.ForeignKey(
@@ -166,6 +175,7 @@ class Album(models.Model):
 
 
 class Track(models.Model):
+    """Track model representing individual music tracks."""
     TrackId = models.AutoField(primary_key=True)
     Name = models.CharField(max_length=200)
     AlbumId = models.ForeignKey(
@@ -187,12 +197,14 @@ class Track(models.Model):
         return self.Name
 
     def duration_formatted(self):
+        """Format milliseconds to MM:SS format."""
         minutes = self.Milliseconds // 60000
         seconds = (self.Milliseconds % 60000) // 1000
         return f"{minutes}:{seconds:02d}"
 
 
 class Review(models.Model):
+    """Review model for user reviews of tracks."""
     RATING_CHOICES = [
         (1, '★'),
         (2, '★★'),
