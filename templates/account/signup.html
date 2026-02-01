@@ -1,0 +1,157 @@
+<!-- templates/account/signup.html -->
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Sign Up</h4>
+                </div>
+                <div class="card-body">
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <strong>Please fix the following errors:</strong>
+                        <ul>
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" id="signup-form">
+                        {% csrf_token %}
+                        
+                        <!-- Allauth Basic Fields -->
+                        <h5>Account Information</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.username|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.email|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.password1|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.password2|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <hr>
+                        <h5>Security Questions</h5>
+                        <p class="text-muted">Please answer these security questions for password recovery.</p>
+
+                        <!-- Security Question 1 -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.question_1|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.answer_1|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <!-- Security Question 2 -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.question_2|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.answer_2|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <!-- Security Question 3 -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.question_3|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.answer_3|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <!-- Security Question 4 -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.question_4|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.answer_4|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <!-- Security Question 5 -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.question_5|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.answer_5|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        {% if redirect_field_value %}
+                        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+                    </form>
+
+                    <div class="mt-3 text-center">
+                        <p>Already have an account? <a href="{% url 'account_login' %}">Log in</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const questionSelects = document.querySelectorAll('select[id^="id_question_"]');
+    
+    function updateAvailableQuestions() {
+        const selectedValues = Array.from(questionSelects).map(select => select.value);
+        
+        questionSelects.forEach((select, index) => {
+            const currentValue = select.value;
+            const currentSelectId = select.id;
+            
+            Array.from(select.options).forEach(option => {
+                if (option.value && option.value !== '' && option.value !== currentValue) {
+                    // Check if this option is selected in any other dropdown
+                    if (selectedValues.includes(option.value) && selectedValues.indexOf(option.value) !== index) {
+                        option.style.display = 'none';
+                        option.disabled = true;
+                    } else {
+                        option.style.display = '';
+                        option.disabled = false;
+                    }
+                }
+            });
+        });
+    }
+    
+    questionSelects.forEach(select => {
+        select.addEventListener('change', updateAvailableQuestions);
+    });
+    
+    // Initial update
+    updateAvailableQuestions();
+});
+</script>
+{% endblock %}

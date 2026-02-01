@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Album - Chinook Music{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0 text-danger">
+                    <i class="fas fa-trash-alt me-2"></i>Delete Album
+                </h2>
+                <a href="{% url 'all_albums' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Albums
+                </a>
+            </div>
+
+            <!-- Selection Card -->
+            <div class="card shadow-sm mb-4 border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Select Album to Delete
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if error %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post" id="selectAlbumForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="album_id" class="form-label fw-bold">Choose Album:</label>
+                            <select id="album_id" name="album_id" class="form-select form-select-lg" required>
+                                <option value="">-- Please select an album --</option>
+                                {% for album in albums %}
+                                <option value="{{ album.AlbumId }}" 
+                                    {% if selected_album and selected_album.AlbumId == album.AlbumId %}selected{% endif %}>
+                                    "{{ album.Title }}" by {{ album.ArtistId.Name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text text-danger">Warning: This action cannot be undone.</div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" name="select_album" class="btn btn-outline-danger btn-lg">
+                                <i class="fas fa-search me-2"></i>Select Album
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Delete Confirmation (Only shown when album is selected) -->
+            {% if selected_album and not error %}
+            <div class="card shadow-lg border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Confirm Deletion
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-skull-crossbones me-2"></i>Danger Zone
+                        </h5>
+                        <p class="mb-3">You are about to permanently delete this album. This action cannot be undone!</p>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Album Details:</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>Title:</strong> {{ selected_album.Title }}</li>
+                                    <li><strong>Artist:</strong> {{ selected_album.ArtistId.Name }}</li>
+                                    <li><strong>Album ID:</strong> {{ selected_album.AlbumId }}</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-warning">
+                                    <h6 class="alert-heading">
+                                        <i class="fas fa-info-circle me-1"></i>Important
+                                    </h6>
+                                    <p class="mb-0">Make sure this is the correct album before proceeding.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post" id="deleteAlbumForm" onsubmit="return confirm('Are you absolutely sure you want to delete \\'{{ selected_album.Title }}\\'? This action cannot be undone.');">
+                        {% csrf_token %}
+                        <input type="hidden" name="album_id" value="{{ selected_album.AlbumId }}">
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'delete_album' %}" class="btn btn-secondary btn-lg me-md-2">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </a>
+                            <button type="submit" name="delete_album" class="btn btn-danger btn-lg">
+                                <i class="fas fa-trash-alt me-2"></i>Permanently Delete Album
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Empty State -->
+            {% if not albums %}
+            <div class="text-center py-5">
+                <div class="empty-state">
+                    <i class="fas fa-compact-disc fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">No Albums Available</h4>
+                    <p class="text-muted">There are no albums in the database to delete.</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Double confirmation for delete
+    const deleteForm = document.getElementById('deleteAlbumForm');
+    if (deleteForm) {
+        deleteForm.addEventListener('submit', function(e) {
+            const albumTitle = "{{ selected_album.Title|escapejs }}";
+            if (!confirm(`FINAL WARNING: Are you absolutely sure you want to delete "${albumTitle}"? This action is permanent and cannot be undone!`)) {
+                e.preventDefault();
+            }
+        });
+    }
+
+    // Smooth scrolling to delete form when album is selected
+    {% if selected_album and not error %}
+    setTimeout(() => {
+        document.querySelector('.card.shadow-lg').scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }, 100);
+    {% endif %}
+});
+</script>
+
+<style>
+.empty-state {
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.empty-state:hover {
+    opacity: 1;
+}
+
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    border: none;
+    font-weight: 600;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+    transform: translateY(-1px);
+}
+</style>
+{% endblock %}

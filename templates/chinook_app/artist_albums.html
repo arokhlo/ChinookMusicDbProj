@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Albums by Artist{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Albums by Artist</h2>
+        
+        <form method="post" class="mb-4">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="artist_id">Select Artist:</label>
+                <select id="artist_id" name="artist_id" class="form-control" required>
+                    <option value="">-- Select an Artist --</option>
+                    {% for artist in artists %}
+                    <option value="{{ artist.ArtistId }}">{{ artist.Name }} (ID: {{ artist.ArtistId }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Show Albums</button>
+        </form>
+
+        {% if albums is not None %}
+            <h3>Albums by {{ artist.Name }} ({{ albums|length }} total)</h3>
+            
+            {% if albums %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Album ID</th>
+                                <th>Title</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for album in albums %}
+                            <tr>
+                                <td>{{ album.AlbumId }}</td>
+                                <td>{{ album.Title }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No albums found for {{ artist.Name }}.
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

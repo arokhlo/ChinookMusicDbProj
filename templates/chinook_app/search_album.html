@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Search Album{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Search Album</h2>
+        
+        <form method="post" class="mb-4">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="search_term">Enter album title to search:</label>
+                <input type="text" id="search_term" name="search_term" value="{{ search_term }}" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+
+        {% if albums is not None %}
+            <h3>Search Results for '{{ search_term }}' ({{ albums|length }} found)</h3>
+            
+            {% if albums %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Album ID</th>
+                                <th>Title</th>
+                                <th>Artist</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for album in albums %}
+                            <tr>
+                                <td>{{ album.AlbumId }}</td>
+                                <td>{{ album.Title }}</td>
+                                <td>{{ album.ArtistId.Name }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-warning">
+                    No albums found matching '{{ search_term }}'.
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

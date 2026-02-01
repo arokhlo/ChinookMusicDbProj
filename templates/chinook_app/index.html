@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Home - 🎵 Chinook Music Database{% endblock %}
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero-section p-5" style="margin-bottom: 5mm !important;">
+    <div class="row align-items-center">
+        <div class="col-lg-8">
+            <h1 class="hero-title fw-bold mb-3">🎵 Welcome to Chinook Music</h1>
+            <p class="lead mb-4">
+                Discover, manage, and explore your music collection with our powerful database platform.
+            </p>
+            <div class="d-flex gap-3 flex-wrap">
+                <a href="{% url 'all_artists' %}" class="btn btn-light btn-lg px-4">
+                    <i class="fas fa-users me-2"></i>Browse Artists
+                </a>
+                <a href="{% url 'all_albums' %}" class="btn btn-light btn-lg px-4">
+                    <i class="fas fa-compact-disc me-2"></i>Explore Albums
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-4 text-center">
+            <i class="fas fa-music" aria-hidden="true" style="font-size: 8rem; opacity: 0.8;"></i>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Cards -->
+<section class="row" style="padding-top: 0.01mm !important;">
+    <div class="col-md-4 mb-4">
+        <div class="card stats-card card-1 text-white shadow-lg border-0">
+            <div class="card-body text-center p-4">
+                <div class="stats-icon mb-3">
+                    <i class="fas fa-users fa-3x text-white opacity-90" aria-hidden="true"></i>
+                </div>
+                <h2 class="stats-number display-4 fw-bold mb-2 text-white">{{ artists_count }}</h2>
+                <p class="h4 mb-3 text-white opacity-90">Artists</p>
+                <a href="{% url 'all_artists' %}" class="btn btn-light btn-sm px-4 py-2 rounded-pill fw-semibold fs-6" style="color: #000 !important;">
+                    View All <i class="fas fa-arrow-right ms-2" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card stats-card card-2 text-white shadow-lg border-0">
+            <div class="card-body text-center p-4">
+                <div class="stats-icon mb-3">
+                    <i class="fas fa-compact-disc fa-3x text-white opacity-90" aria-hidden="true"></i>
+                </div>
+                <h2 class="stats-number display-4 fw-bold mb-2 text-white">{{ albums_count }}</h2>
+                <p class="h4 mb-3 text-white opacity-90">Albums</p>
+                <a href="{% url 'all_albums' %}" class="btn btn-light btn-sm px-4 py-2 rounded-pill fw-semibold fs-6" style="color: #000 !important;">
+                    View All <i class="fas fa-arrow-right ms-2" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card stats-card card-3 text-white shadow-lg border-0">
+            <div class="card-body text-center p-4">
+                <div class="stats-icon mb-3">
+                    <i class="fas fa-music fa-3x text-white opacity-90" aria-hidden="true"></i>
+                </div>
+                <h2 class="stats-number display-4 fw-bold mb-2 text-white">{{ tracks_count }}</h2>
+                <p class="h4 mb-3 text-white opacity-90">Tracks</p>
+                <a href="{% url 'search_track' %}" class="btn btn-light btn-sm px-4 py-2 rounded-pill fw-semibold fs-6" style="color: #000 !important;">
+                    View All <i class="fas fa-arrow-right ms-2" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Albums, Tracks, and Quick Actions -->
+<section class="row" style="padding-top: 0.1mm !important;">
+    <!-- Recent Albums -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-compact-disc me-2"></i>Recent Albums
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="recent-albums-container">
+                    {% if recent_albums %}
+                        {% for album in recent_albums %}
+                        <div class="recent-album-item bg-light p-3 rounded mb-2">
+                            <h6 class="mb-1">{{ album.Title }}</h6>
+                            <p class="mb-1 text-muted small">by {{ album.ArtistId.Name }}</p>
+                            <small class="text-primary">Album ID: {{ album.AlbumId }}</small>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">No recent albums available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Tracks -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-music me-2"></i>Recent Tracks
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="recent-tracks-container">
+                    {% if recent_tracks %}
+                        {% for track in recent_tracks %}
+                        <div class="recent-track-item bg-light p-3 rounded mb-2">
+                            <h6 class="mb-1">{{ track.Name }}</h6>
+                            <p class="mb-1 text-muted small">
+                                {{ track.AlbumId.Title }} • {{ track.AlbumId.ArtistId.Name }}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">{{ track.duration_formatted }}</small>
+                                <span class="badge bg-primary">${{ track.UnitPrice }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center">No recent tracks available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-3">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'add_artist' %}" class="btn quick-action-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="fas fa-user-plus me-2"></i>Add New Artist
+                        </a>
+                        <a href="{% url 'add_album' %}" class="btn quick-action-btn" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <i class="fas fa-compact-disc me-2"></i>Add New Album
+                        </a>
+                        <a href="{% url 'search_track' %}" class="btn quick-action-btn" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <i class="fas fa-search me-2"></i>Search Tracks
+                        </a>
+                        {% if user.groups.all %}
+                            {% for group in user.groups.all %}
+                                {% if group.name == 'Admin' or group.name == 'Superuser' or group.name == 'Staff' %}
+                                    <a href="{% url 'user_management' %}" class="btn quick-action-btn" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                                        <i class="fas fa-users-cog me-2"></i>User Management
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'account_login' %}" class="btn quick-action-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </a>
+                        <a href="{% url 'account_signup' %}" class="btn quick-action-btn" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <i class="fas fa-user-plus me-2"></i>Sign Up
+                        </a>
+                        <a href="{% url 'all_artists' %}" class="btn quick-action-btn" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <i class="fas fa-users me-2"></i>Browse Artists
+                        </a>
+                        <a href="{% url 'all_albums' %}" class="btn quick-action-btn" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                            <i class="fas fa-compact-disc me-2"></i>Explore Albums
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Explore Section -->
+<section class="row" style="padding-top: 0.1mm !important;">
+    <div class="col-12">
+        <div class="card border-0 shadow-lg explore-section">
+            <div class="card-body text-center py-5">
+                <h2 class="explore-title display-5 fw-bold mb-3">🎶 Ready to Explore Your Music World?</h2>
+                <p class="explore-text lead mb-4">
+                    Start your musical journey with our comprehensive database featuring thousands of artists, albums, and tracks.
+                </p>
+                <div class="d-flex justify-content-center gap-4 flex-wrap">
+                    <a href="{% url 'all_artists' %}" class="btn btn-light btn-lg px-4">
+                        <i class="fas fa-star me-2" aria-hidden="true"></i>Discover Artists
+                    </a>
+                    <a href="{% url 'all_albums' %}" class="btn btn-light btn-lg px-4">
+                        <i class="fas fa-gem me-2" aria-hidden="true"></i>Explore Albums
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
