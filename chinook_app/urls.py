@@ -95,6 +95,13 @@ urlpatterns = [
         views.delete_avatar,
         name='delete_avatar'
     ),
+    
+    # ADD THIS LINE FOR SECURITY QUESTIONS SETUP
+    path(
+        'profile/setup-security-questions/',
+        views.setup_security_questions,
+        name='setup_security_questions'
+    ),
 
     # ===== ADMIN USER MANAGEMENT =====
     path('user-management/', views.user_management, name='user_management'),

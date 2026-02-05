@@ -9,6 +9,123 @@ from .models import Artist, Album, Review, UserProfile, SecurityQuestion
 
 User = get_user_model()
 
+# Add this class to the end of the file
+class SecurityQuestionSetupForm(forms.Form):
+    """Form for setting up security questions for existing users."""
+    
+    # Security Questions Fields
+    question_1 = forms.ChoiceField(
+        choices=[],
+        label="Security Question 1",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=True
+    )
+    answer_1 = forms.CharField(
+        max_length=255,
+        label="Answer 1",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True
+    )
+
+    question_2 = forms.ChoiceField(
+        choices=[],
+        label="Security Question 2",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=True
+    )
+    answer_2 = forms.CharField(
+        max_length=255,
+        label="Answer 2",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True
+    )
+
+    question_3 = forms.ChoiceField(
+        choices=[],
+        label="Security Question 3",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=True
+    )
+    answer_3 = forms.CharField(
+        max_length=255,
+        label="Answer 3",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True
+    )
+
+    question_4 = forms.ChoiceField(
+        choices=[],
+        label="Security Question 4",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=True
+    )
+    answer_4 = forms.CharField(
+        max_length=255,
+        label="Answer 4",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True
+    )
+
+    question_5 = forms.ChoiceField(
+        choices=[],
+        label="Security Question 5",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=True
+    )
+    answer_5 = forms.CharField(
+        max_length=255,
+        label="Answer 5",
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Get all available questions from the SecurityQuestion model
+        from .models import SecurityQuestion
+        question_choices = SecurityQuestion.QUESTION_CHOICES.copy()
+
+        # Initialize all question fields with the same choices
+        for i in range(1, 6):
+            self.fields[f'question_{i}'].choices = [
+                ('', '---------')
+            ] + question_choices
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        # Check for duplicate questions
+        questions = []
+        for i in range(1, 6):
+            question = cleaned_data.get(f'question_{i}')
+            if question:
+                questions.append(question)
+
+        # Check for duplicates
+        if len(questions) != len(set(questions)):
+            raise forms.ValidationError(
+                "You cannot select the same security question multiple times. "
+                "Please choose different questions."
+            )
+
+        # Validate that answers are provided for all questions
+        for i in range(1, 6):
+            question = cleaned_data.get(f'question_{i}')
+            answer = cleaned_data.get(f'answer_{i}')
+
+            if question and (not answer or not answer.strip()):
+                self.add_error(
+                    f'answer_{i}',
+                    'This field is required when a question is selected.'
+                )
+            elif not question and answer:
+                self.add_error(
+                    f'question_{i}',
+                    'Please select a question for this answer.'
+                )
+
+        return cleaned_data
 
 class SetNewPasswordForm(forms.Form):
     """Form for setting new password after security question verification."""

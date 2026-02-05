@@ -1,3 +1,10 @@
+"""
+Views for Chinook Music Database application.
+
+This module contains all view functions and classes for handling
+HTTP requests and responses for the Chinook music database.
+"""
+
 import os
 import random
 from django.shortcuts import render, redirect, get_object_or_404
@@ -252,6 +259,102 @@ class SecurityQuestionPasswordResetView(View):
                 )
 
         return render(request, self.template_name, {'form': form})
+
+
+@login_required
+def setup_security_questions(request):
+    """Set up security questions for existing users."""
+    
+    # Check if user already has security questions
+    try:
+        SecurityQuestion.objects.get(user=request.user)
+        messages.info(
+            request,
+            'You already have security questions set up. '
+            'You can manage them from the admin panel.'
+        )
+        return redirect('profile')
+    except SecurityQuestion.DoesNotExist:
+        pass
+    
+    if request.method == 'POST':
+        # Create a form instance with POST data
+        from .forms import SecurityQuestionSetupForm
+        form = SecurityQuestionSetupForm(request.POST)
+        if form.is_valid():
+            # Create security questions for user
+            security_questions = SecurityQuestion(
+                user=request.user,
+                question_1=form.cleaned_data['question_1'],
+                answer_1=form.cleaned_data['answer_1'].lower().strip(),
+                question_2=form.cleaned_data['question_2'],
+                answer_2=form.cleaned_data['answer_2'].lower().strip(),
+                question_3=form.cleaned_data['question_3'],
+                answer_3=form.cleaned_data['answer_3'].lower().strip(),
+                question_4=form.cleaned_data['question_4'],
+                answer_4=form.cleaned_data['answer_4'].lower().strip(),
+                question_5=form.cleaned_data['question_5'],
+                answer_5=form.cleaned_data['answer_5'].lower().strip(),
+            )
+            security_questions.save()
+            
+            messages.success(
+                request,
+                'Security questions have been set up successfully! '
+                'You can now use them for password recovery.'
+            )
+            return redirect('profile')
+    else:
+        from .forms import SecurityQuestionSetupForm
+        form = SecurityQuestionSetupForm()
+    
+    return render(request, 'chinook_app/setup_security_questions.html', {
+        'form': form
+    })
+
+
+@login_required
+def profile_view(request):
+    """Handle user profile updates including security questions."""
+    user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+    has_security_questions = SecurityQuestion.objects.filter(user=request.user).exists()
+    
+    if request.method == 'POST':
+        # Check which form was submitted
+        if 'update_profile' in request.POST:
+            profile_form = UserProfileForm(
+                request.POST, request.FILES, instance=user_profile
+            )
+            email_form = UserEmailForm(instance=request.user)
+
+            if profile_form.is_valid():
+                profile_form.save()
+                messages.success(
+                    request, 'Your profile has been updated successfully!'
+                )
+                return redirect('profile')
+
+        elif 'update_email' in request.POST:
+            profile_form = UserProfileForm(instance=user_profile)
+            email_form = UserEmailForm(request.POST, instance=request.user)
+
+            if email_form.is_valid():
+                email_form.save()
+                messages.success(
+                    request,
+                    'Your email address has been updated successfully!'
+                )
+                return redirect('profile')
+    else:
+        profile_form = UserProfileForm(instance=user_profile)
+        email_form = UserEmailForm(instance=request.user)
+
+    return render(request, 'chinook_app/profile.html', {
+        'profile_form': profile_form,
+        'email_form': email_form,
+        'user_profile': user_profile,
+        'has_security_questions': has_security_questions 
+    })
 
 
 @admin_required
@@ -522,49 +625,6 @@ class CustomPasswordResetView(PasswordResetView):
         return self.form_invalid(form)
 
 
-# ===== USER PROFILE VIEWS =====
-@login_required
-def profile_view(request):
-    """Handle user profile updates including security questions."""
-    user_profile, created = UserProfile.objects.get_or_create(user=request.user)
-
-    if request.method == 'POST':
-        # Check which form was submitted
-        if 'update_profile' in request.POST:
-            profile_form = UserProfileForm(
-                request.POST, request.FILES, instance=user_profile
-            )
-            email_form = UserEmailForm(instance=request.user)
-
-            if profile_form.is_valid():
-                profile_form.save()
-                messages.success(
-                    request, 'Your profile has been updated successfully!'
-                )
-                return redirect('profile')
-
-        elif 'update_email' in request.POST:
-            profile_form = UserProfileForm(instance=user_profile)
-            email_form = UserEmailForm(request.POST, instance=request.user)
-
-            if email_form.is_valid():
-                email_form.save()
-                messages.success(
-                    request,
-                    'Your email address has been updated successfully!'
-                )
-                return redirect('profile')
-    else:
-        profile_form = UserProfileForm(instance=user_profile)
-        email_form = UserEmailForm(instance=request.user)
-
-    return render(request, 'chinook_app/profile.html', {
-        'profile_form': profile_form,
-        'email_form': email_form,
-        'user_profile': user_profile
-    })
-
-
 @login_required
 def delete_avatar(request):
     """Handle avatar deletion for user profile."""
@@ -589,38 +649,82 @@ def delete_avatar(request):
 # ===== CORE APPLICATION VIEWS =====
 def index(request):
     """Homepage view with statistics and recent content."""
+    try:
+        # Safely get counts with error handling for missing tables
+        artists_count = Artist.objects.count() if hasattr(Artist.objects, 'count') else 0
+        albums_count = Album.objects.count() if hasattr(Album.objects, 'count') else 0
+        tracks_count = Track.objects.count() if hasattr(Track.objects, 'count') else 0
+        
+        # Get recent albums if table exists
+        try:
+            recent_albums = Album.objects.select_related(
+                'ArtistId'
+            ).order_by('-AlbumId')[:3]
+        except:
+            recent_albums = []
+        
+        # Get recent tracks if table exists
+        try:
+            recent_tracks = Track.objects.select_related(
+                'AlbumId', 'AlbumId__ArtistId'
+            ).all()[:15]
+        except:
+            recent_tracks = []
+        
+        # Get top rated tracks if table exists
+        try:
+            top_rated_tracks = Track.objects.annotate(
+                avg_rating=Avg('review__rating')
+            ).filter(avg_rating__gte=4).order_by('-avg_rating')[:5]
+        except:
+            top_rated_tracks = []
+            
+    except Exception as e:
+        # If any database error occurs, use default values
+        print(f"Database error in index view: {e}")  # For debugging
+        artists_count = 0
+        albums_count = 0
+        tracks_count = 0
+        recent_albums = []
+        recent_tracks = []
+        top_rated_tracks = []
+    
     stats = {
-        'artists_count': Artist.objects.count(),
-        'albums_count': Album.objects.count(),
-        'tracks_count': Track.objects.count(),
-        'recent_albums': Album.objects.select_related(
-            'ArtistId'
-        ).order_by('-AlbumId')[:3],
-        'recent_tracks': Track.objects.select_related(
-            'AlbumId', 'AlbumId__ArtistId'
-        ).all()[:15],
-        'top_rated_tracks': Track.objects.annotate(
-            avg_rating=Avg('review__rating')
-        ).filter(avg_rating__gte=4).order_by('-avg_rating')[:5]
+        'artists_count': artists_count,
+        'albums_count': albums_count,
+        'tracks_count': tracks_count,
+        'recent_albums': recent_albums,
+        'recent_tracks': recent_tracks,
+        'top_rated_tracks': top_rated_tracks
     }
     return render(request, 'chinook_app/index.html', stats)
 
 
 def all_artists(request):
     """Display paginated list of all artists."""
-    artists = Artist.objects.all().order_by('Name')
-    paginator = Paginator(artists, 20)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    try:
+        artists = Artist.objects.all().order_by('Name')
+        paginator = Paginator(artists, 20)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+    except:
+        # If table doesn't exist, show empty page
+        page_obj = []
+    
     return render(request, 'chinook_app/artists.html', {'artists': page_obj})
 
 
 def all_albums(request):
     """Display paginated list of all albums."""
-    albums = Album.objects.select_related('ArtistId').all().order_by('Title')
-    paginator = Paginator(albums, 20)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    try:
+        albums = Album.objects.select_related('ArtistId').all().order_by('Title')
+        paginator = Paginator(albums, 20)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+    except:
+        # If table doesn't exist, show empty page
+        page_obj = []
+    
     return render(request, 'chinook_app/albums.html', {'albums': page_obj})
 
 
@@ -633,9 +737,12 @@ def search_artist(request):
     if request.method == 'POST':
         search_term = request.POST.get('search_term', '')
         if search_term:
-            artists = Artist.objects.filter(
-                Q(Name__icontains=search_term)
-            ).order_by('Name')
+            try:
+                artists = Artist.objects.filter(
+                    Q(Name__icontains=search_term)
+                ).order_by('Name')
+            except:
+                artists = []
 
     return render(request, 'chinook_app/search_artist.html', {
         'artists': artists,
@@ -651,9 +758,12 @@ def search_album(request):
     if request.method == 'POST':
         search_term = request.POST.get('search_term', '')
         if search_term:
-            albums = Album.objects.filter(
-                Q(Title__icontains=search_term)
-            ).select_related('ArtistId').order_by('Title')
+            try:
+                albums = Album.objects.filter(
+                    Q(Title__icontains=search_term)
+                ).select_related('ArtistId').order_by('Title')
+            except:
+                albums = []
 
     return render(request, 'chinook_app/search_album.html', {
         'albums': albums,
@@ -669,9 +779,12 @@ def search_track(request):
     if request.method == 'POST':
         search_term = request.POST.get('search_term', '')
         if search_term:
-            tracks = Track.objects.filter(
-                Q(Name__icontains=search_term)
-            ).select_related('AlbumId', 'AlbumId__ArtistId').order_by('Name')
+            try:
+                tracks = Track.objects.filter(
+                    Q(Name__icontains=search_term)
+                ).select_related('AlbumId', 'AlbumId__ArtistId').order_by('Name')
+            except:
+                tracks = []
 
     return render(request, 'chinook_app/search_track.html', {
         'tracks': tracks,
@@ -687,10 +800,14 @@ def artist_albums(request):
     if request.method == 'POST':
         artist_id = request.POST.get('artist_id')
         if artist_id:
-            artist = get_object_or_404(Artist, ArtistId=artist_id)
-            albums = Album.objects.filter(ArtistId=artist_id).order_by('Title')
+            try:
+                artist = get_object_or_404(Artist, ArtistId=artist_id)
+                albums = Album.objects.filter(ArtistId=artist_id).order_by('Title')
+            except:
+                artist = None
+                albums = []
 
-    artists = Artist.objects.all().order_by('Name')
+    artists = Artist.objects.all().order_by('Name') if hasattr(Artist.objects, 'all') else []
     return render(request, 'chinook_app/artist_albums.html', {
         'artists': artists,
         'albums': albums,
@@ -706,10 +823,14 @@ def album_tracks(request):
     if request.method == 'POST':
         album_id = request.POST.get('album_id')
         if album_id:
-            album = get_object_or_404(Album, AlbumId=album_id)
-            tracks = Track.objects.filter(AlbumId=album_id).order_by('TrackId')
+            try:
+                album = get_object_or_404(Album, AlbumId=album_id)
+                tracks = Track.objects.filter(AlbumId=album_id).order_by('TrackId')
+            except:
+                album = None
+                tracks = []
 
-    albums = Album.objects.select_related('ArtistId').all().order_by('Title')
+    albums = Album.objects.select_related('ArtistId').all().order_by('Title') if hasattr(Album.objects, 'all') else []
     return render(request, 'chinook_app/album_tracks.html', {
         'albums': albums,
         'tracks': tracks,
@@ -781,7 +902,7 @@ def add_album(request):
     else:
         form = AlbumForm()
 
-    artists = Artist.objects.all().order_by('Name')
+    artists = Artist.objects.all().order_by('Name') if hasattr(Artist.objects, 'all') else []
     return render(request, 'chinook_app/add_album.html', {
         'form': form,
         'artists': artists
@@ -792,14 +913,17 @@ def add_album(request):
 @login_required
 def update_artist(request):
     """Update existing artist information."""
-    artists = Artist.objects.all().order_by('Name')
+    artists = Artist.objects.all().order_by('Name') if hasattr(Artist.objects, 'all') else []
     selected_artist = None
 
     if request.method == 'POST':
         if 'select_artist' in request.POST:
             artist_id = request.POST.get('artist_id')
             if artist_id:
-                selected_artist = get_object_or_404(Artist, ArtistId=artist_id)
+                try:
+                    selected_artist = get_object_or_404(Artist, ArtistId=artist_id)
+                except:
+                    selected_artist = None
 
         elif 'update_artist' in request.POST:
             artist_id = request.POST.get('artist_id')
@@ -833,14 +957,17 @@ def update_artist(request):
 @login_required
 def update_album(request):
     """Update existing album information."""
-    albums = Album.objects.select_related('ArtistId').all().order_by('Title')
+    albums = Album.objects.select_related('ArtistId').all().order_by('Title') if hasattr(Album.objects, 'all') else []
     selected_album = None
 
     if request.method == 'POST':
         if 'select_album' in request.POST:
             album_id = request.POST.get('album_id')
             if album_id:
-                selected_album = get_object_or_404(Album, AlbumId=album_id)
+                try:
+                    selected_album = get_object_or_404(Album, AlbumId=album_id)
+                except:
+                    selected_album = None
 
         elif 'update_album' in request.POST:
             album_id = request.POST.get('album_id')
@@ -876,7 +1003,7 @@ def update_album(request):
 @staff_required
 def delete_artist(request):
     """Delete artist from the database (with validation)."""
-    artists = Artist.objects.all().order_by('Name')
+    artists = Artist.objects.all().order_by('Name') if hasattr(Artist.objects, 'all') else []
     selected_artist = None
     error = None
 
@@ -884,29 +1011,35 @@ def delete_artist(request):
         if 'select_artist' in request.POST:
             artist_id = request.POST.get('artist_id')
             if artist_id:
-                selected_artist = get_object_or_404(Artist, ArtistId=artist_id)
-                # Check if artist has albums
-                if Album.objects.filter(ArtistId=artist_id).exists():
-                    error = (
-                        "Cannot delete artist with existing albums. "
-                        "Please delete the albums first."
-                    )
+                try:
+                    selected_artist = get_object_or_404(Artist, ArtistId=artist_id)
+                    # Check if artist has albums
+                    if Album.objects.filter(ArtistId=artist_id).exists():
+                        error = (
+                            "Cannot delete artist with existing albums. "
+                            "Please delete the albums first."
+                        )
+                except:
+                    selected_artist = None
 
         elif 'delete_artist' in request.POST:
             artist_id = request.POST.get('artist_id')
             if artist_id:
-                artist = get_object_or_404(Artist, ArtistId=artist_id)
-                artist_name = artist.Name
-                # Double-check no albums exist
-                if not Album.objects.filter(ArtistId=artist_id).exists():
-                    artist.delete()
-                    success_msg = (
-                        f'Artist "{artist_name}" deleted successfully!'
-                    )
-                    messages.success(request, success_msg)
-                    return redirect('all_artists')
-                else:
-                    error = "Cannot delete artist with existing albums."
+                try:
+                    artist = get_object_or_404(Artist, ArtistId=artist_id)
+                    artist_name = artist.Name
+                    # Double-check no albums exist
+                    if not Album.objects.filter(ArtistId=artist_id).exists():
+                        artist.delete()
+                        success_msg = (
+                            f'Artist "{artist_name}" deleted successfully!'
+                        )
+                        messages.success(request, success_msg)
+                        return redirect('all_artists')
+                    else:
+                        error = "Cannot delete artist with existing albums."
+                except:
+                    error = "Artist not found or cannot be deleted."
 
     return render(request, 'chinook_app/delete_artist.html', {
         'artists': artists,
@@ -919,7 +1052,7 @@ def delete_artist(request):
 @staff_required
 def delete_album(request):
     """Delete album from the database (with validation)."""
-    albums = Album.objects.select_related('ArtistId').all().order_by('Title')
+    albums = Album.objects.select_related('ArtistId').all().order_by('Title') if hasattr(Album.objects, 'all') else []
     selected_album = None
     error = None
 
@@ -927,29 +1060,35 @@ def delete_album(request):
         if 'select_album' in request.POST:
             album_id = request.POST.get('album_id')
             if album_id:
-                selected_album = get_object_or_404(Album, AlbumId=album_id)
-                # Check if album has tracks
-                if Track.objects.filter(AlbumId=album_id).exists():
-                    error = (
-                        "Cannot delete album with existing tracks. "
-                        "Please delete the tracks first."
-                    )
+                try:
+                    selected_album = get_object_or_404(Album, AlbumId=album_id)
+                    # Check if album has tracks
+                    if Track.objects.filter(AlbumId=album_id).exists():
+                        error = (
+                            "Cannot delete album with existing tracks. "
+                            "Please delete the tracks first."
+                        )
+                except:
+                    selected_album = None
 
         elif 'delete_album' in request.POST:
             album_id = request.POST.get('album_id')
             if album_id:
-                album = get_object_or_404(Album, AlbumId=album_id)
-                album_title = album.Title
-                # Double-check no tracks exist
-                if not Track.objects.filter(AlbumId=album_id).exists():
-                    album.delete()
-                    success_msg = (
-                        f'Album "{album_title}" deleted successfully!'
-                    )
-                    messages.success(request, success_msg)
-                    return redirect('all_albums')
-                else:
-                    error = "Cannot delete album with existing tracks."
+                try:
+                    album = get_object_or_404(Album, AlbumId=album_id)
+                    album_title = album.Title
+                    # Double-check no tracks exist
+                    if not Track.objects.filter(AlbumId=album_id).exists():
+                        album.delete()
+                        success_msg = (
+                            f'Album "{album_title}" deleted successfully!'
+                        )
+                        messages.success(request, success_msg)
+                        return redirect('all_albums')
+                    else:
+                        error = "Cannot delete album with existing tracks."
+                except:
+                    error = "Album not found or cannot be deleted."
 
     return render(request, 'chinook_app/delete_album.html', {
         'albums': albums,
@@ -962,7 +1101,11 @@ def delete_album(request):
 @login_required
 def add_review(request, track_id):
     """Add a review for a specific track."""
-    track = get_object_or_404(Track, TrackId=track_id)
+    try:
+        track = get_object_or_404(Track, TrackId=track_id)
+    except:
+        messages.error(request, 'Track not found.')
+        return redirect('home')
 
     if request.method == 'POST':
         form = ReviewForm(request.POST)
@@ -987,7 +1130,11 @@ def add_review(request, track_id):
 @login_required
 def update_review(request, review_id):
     """Update an existing review."""
-    review = get_object_or_404(Review, id=review_id, user=request.user)
+    try:
+        review = get_object_or_404(Review, id=review_id, user=request.user)
+    except:
+        messages.error(request, 'Review not found.')
+        return redirect('home')
 
     if request.method == 'POST':
         form = ReviewForm(request.POST, instance=review)
@@ -1009,7 +1156,11 @@ def update_review(request, review_id):
 @login_required
 def delete_review(request, review_id):
     """Delete an existing review."""
-    review = get_object_or_404(Review, id=review_id, user=request.user)
+    try:
+        review = get_object_or_404(Review, id=review_id, user=request.user)
+    except:
+        messages.error(request, 'Review not found.')
+        return redirect('home')
 
     if request.method == 'POST':
         track_id = review.track.TrackId
@@ -1026,18 +1177,28 @@ def delete_review(request, review_id):
 
 def track_detail(request, track_id):
     """Display track details and associated reviews."""
-    track = get_object_or_404(Track, TrackId=track_id)
-    reviews = Review.objects.filter(track=track).select_related('user')
-    user_review = None
+    try:
+        track = get_object_or_404(Track, TrackId=track_id)
+        reviews = Review.objects.filter(track=track).select_related('user')
+        user_review = None
 
-    if request.user.is_authenticated:
-        user_review = Review.objects.filter(
-            track=track, user=request.user
-        ).first()
+        if request.user.is_authenticated:
+            user_review = Review.objects.filter(
+                track=track, user=request.user
+            ).first()
+
+        average_rating = reviews.aggregate(Avg('rating'))['rating__avg']
+    except:
+        # If track doesn't exist or there's an error
+        track = None
+        reviews = []
+        user_review = None
+        average_rating = None
+        messages.error(request, 'Track not found or cannot be accessed.')
 
     return render(request, 'chinook_app/track_detail.html', {
         'track': track,
         'reviews': reviews,
         'user_review': user_review,
-        'average_rating': reviews.aggregate(Avg('rating'))['rating__avg']
+        'average_rating': average_rating
     })
