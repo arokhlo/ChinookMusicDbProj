@@ -5,25 +5,6 @@
 
 {% block content %}
 
-<!-- In the card-footer section of profile.html -->
-<!-- Find the card-footer section and update it -->
-<div class="card-footer bg-light">
-    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-        <a href="{% url 'home' %}" class="btn btn-outline-secondary me-md-2">
-            <i class="fas fa-arrow-left me-1"></i>Back to Home
-        </a>
-        {% if has_security_questions %}
-            <a href="{% url 'change_password_with_security' %}" class="btn btn-warning">
-                <i class="fas fa-key me-1"></i>Change Password
-            </a>
-        {% else %}
-            <a href="{% url 'setup_security_questions' %}" class="btn btn-primary">
-                <i class="fas fa-shield-alt me-1"></i>Setup Security Questions
-            </a>
-        {% endif %}
-    </div>
-</div>
-
 <div class="row justify-content-center">
     <div class="col-md-10">
         <div class="card border-0 shadow">
@@ -149,6 +130,24 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Card Footer with Action Buttons -->
+            <div class="card-footer bg-light">
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{% url 'home' %}" class="btn btn-outline-secondary me-md-2">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Home
+                    </a>
+                    {% if has_security_questions %}
+                        <a href="{% url 'change_password_with_security' %}" class="btn btn-warning">
+                            <i class="fas fa-key me-1"></i>Change Password
+                        </a>
+                    {% else %}
+                        <a href="{% url 'setup_security_questions' %}" class="btn btn-primary">
+                            <i class="fas fa-shield-alt me-1"></i>Setup Security Questions
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
         </div>
         
         <!-- Account Information Card -->
@@ -181,6 +180,13 @@
                                 <span class="badge bg-secondary">Not Yet</span>
                             {% endif %}
                         </p>
+                        <p><strong>Security Questions:</strong> 
+                            {% if has_security_questions %}
+                                <span class="badge bg-success">Set Up</span>
+                            {% else %}
+                                <span class="badge bg-warning">Not Set Up</span>
+                            {% endif %}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -190,9 +196,18 @@
                     <a href="{% url 'home' %}" class="btn btn-outline-secondary me-md-2">
                         <i class="fas fa-arrow-left me-1"></i>Back to Home
                     </a>
-                    <a href="{% url 'change_password_with_security' %}" class="btn btn-warning">
-                        <i class="fas fa-key me-1"></i>Change Password
-                    </a>
+                    {% if has_security_questions %}
+                        <a href="{% url 'change_password_with_security' %}" class="btn btn-warning">
+                            <i class="fas fa-key me-1"></i>Change Password
+                        </a>
+                        <a href="{% url 'setup_security_questions' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-shield-alt me-1"></i>Update Security Questions
+                        </a>
+                    {% else %}
+                        <a href="{% url 'setup_security_questions' %}" class="btn btn-primary">
+                            <i class="fas fa-shield-alt me-1"></i>Setup Security Questions
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -220,6 +235,10 @@
     .form-text {
         font-size: 0.85rem;
         color: #6c757d;
+    }
+    .badge {
+        font-size: 0.85em;
+        padding: 0.4em 0.8em;
     }
 </style>
 {% endblock %}

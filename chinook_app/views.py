@@ -1,9 +1,23 @@
-"""
-Views for Chinook Music Database application.
 
-This module contains all view functions and classes for handling
-HTTP requests and responses for the Chinook music database.
-"""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 import os
 import random
@@ -67,11 +81,21 @@ def can_delete_content(user):
         user.groups.filter(name__in=['Admin', 'Superuser', 'Staff']).exists()
     )
 
-
-# ===== SECURITY QUESTION PASSWORD CHANGE VIEW =====
 @login_required
 def change_password_with_security_questions(request):
     """Handle password change with security question verification."""
+    
+    # First check if user has security questions
+    try:
+        user_questions = SecurityQuestion.objects.get(user=request.user)
+    except SecurityQuestion.DoesNotExist:
+        messages.warning(
+            request,
+            'You need to set up security questions first to change your password. '
+            'Redirecting to security questions setup...'
+        )
+        return redirect('setup_security_questions')
+    
     if request.method == 'POST':
         # Check if we're in the security questions phase
         # or password change phase
@@ -81,17 +105,6 @@ def change_password_with_security_questions(request):
             question2_id = request.POST.get('question2_id')
             answer1 = request.POST.get('answer1', '').strip().lower()
             answer2 = request.POST.get('answer2', '').strip().lower()
-
-            # Get user's security questions
-            try:
-                user_questions = SecurityQuestion.objects.get(
-                    user=request.user
-                )
-            except SecurityQuestion.DoesNotExist:
-                messages.error(
-                    request, 'Security questions not set up for your account.'
-                )
-                return redirect('profile')
 
             # Verify answers
             correct_answers = 0
@@ -163,14 +176,6 @@ def change_password_with_security_questions(request):
 
     else:
         # GET request - show security questions
-        try:
-            user_questions = SecurityQuestion.objects.get(user=request.user)
-        except SecurityQuestion.DoesNotExist:
-            messages.error(
-                request, 'Security questions not set up for your account.'
-            )
-            return redirect('profile')
-
         # Get all available questions
         available_questions = []
         question_fields = [
@@ -187,7 +192,7 @@ def change_password_with_security_questions(request):
             messages.error(
                 request, 'You need to set up at least 2 security questions.'
             )
-            return redirect('profile')
+            return redirect('setup_security_questions')
 
         # Randomly select 2 questions
         selected_questions = random.sample(available_questions, 2)
@@ -198,7 +203,6 @@ def change_password_with_security_questions(request):
             'question2_id': selected_questions[1],
             'show_security_questions': True
         })
-
 
 # ===== SECURITY QUESTION PASSWORD RESET VIEWS =====
 @method_decorator(csrf_protect, name='dispatch')
@@ -259,7 +263,6 @@ class SecurityQuestionPasswordResetView(View):
                 )
 
         return render(request, self.template_name, {'form': form})
-
 
 @login_required
 def setup_security_questions(request):
