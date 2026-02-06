@@ -43,6 +43,12 @@ urlpatterns = [
     # ===== HOME & CORE PAGES =====
     path('', views.index, name='home'),
 
+    # ===== NAVIGATION PAGES =====
+    path('artist/<int:artist_id>/', views.artist_detail, name='artist_detail'),
+    path('album/<int:album_id>/', views.album_detail, name='album_detail'),
+    path('artist/<int:artist_id>/albums/', views.artist_albums_detailed, name='artist_albums_detailed'),
+    path('album/<int:album_id>/tracks/', views.album_tracks_detailed, name='album_tracks_detailed'),
+
     # ===== BROWSE PAGES =====
     path('artists/', views.all_artists, name='all_artists'),
     path('albums/', views.all_albums, name='all_albums'),
@@ -65,78 +71,23 @@ urlpatterns = [
     # ===== DELETE OPERATIONS =====
     path('delete-artist/', views.delete_artist, name='delete_artist'),
     path('delete-album/', views.delete_album, name='delete_album'),
-
-    # Frontend delete URLs (if you want separate endpoints)
     path('artist/<int:artist_id>/delete/', views.delete_artist_frontend, name='delete_artist_frontend'),
     path('album/<int:album_id>/delete/', views.delete_album_frontend, name='delete_album_frontend'),
- 
+
     # ===== TRACK & REVIEW SYSTEM =====
     path('track/<int:track_id>/', views.track_detail, name='track_detail'),
-    path(
-        'track/<int:track_id>/review/',
-        views.add_review,
-        name='add_review'
-    ),
-    path(
-        'review/<int:review_id>/update/',
-        views.update_review,
-        name='update_review'
-    ),
-    path(
-        'review/<int:review_id>/delete/',
-        views.delete_review,
-        name='delete_review'
-    ),
+    path('track/<int:track_id>/review/', views.add_review, name='add_review'),
+    path('review/<int:review_id>/update/', views.update_review, name='update_review'),
+    path('review/<int:review_id>/delete/', views.delete_review, name='delete_review'),
 
     # ===== USER PROFILE MANAGEMENT =====
     path('profile/', views.profile_view, name='profile'),
-    path(
-        'profile/delete-avatar/',
-        views.delete_avatar,
-        name='delete_avatar'
-    ),
-    
-    # ADD THIS LINE FOR SECURITY QUESTIONS SETUP
-    path(
-        'profile/setup-security-questions/',
-        views.setup_security_questions,
-        name='setup_security_questions'
-    ),
+    path('profile/delete-avatar/', views.delete_avatar, name='delete_avatar'),
+    path('profile/setup-security-questions/', views.setup_security_questions, name='setup_security_questions'),
 
     # ===== ADMIN USER MANAGEMENT =====
     path('user-management/', views.user_management, name='user_management'),
 
     # ===== INCLUDE DJANGO-ALLAUTH URLS =====
     path('accounts/', include('allauth.urls')),
-
-    # Add these URLs
-    path(
-        'album/<int:album_id>/delete/',
-        views.delete_album_frontend,
-        name='delete_album_frontend'
-    ),
-    path(
-        'artist/<int:artist_id>/delete/',
-        views.delete_artist_frontend,
-        name='delete_artist_frontend'
-    ),
-
-    path(
-        'accounts/change-password/',
-        views.change_password_with_security_questions,
-        name='change_password_with_security'
-    ),
-
-    path(
-        'accounts/password/change/',
-        views.change_password_with_security_questions,
-        name='account_change_password'
-    ),
-
-    # Keep your custom URL for testing
-    path(
-        'accounts/change-password-security/',
-        views.change_password_with_security_questions,
-        name='change_password_with_security'
-    ),
 ]

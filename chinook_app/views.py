@@ -1,30 +1,9 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import os
 import random
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Q, Avg
+from django.db.models import Q, Avg, Sum
 from django.core.paginator import Paginator
 from django.db import connection
 from django.contrib.auth.models import User
@@ -33,11 +12,12 @@ from django.contrib.auth import (
 )
 from django.contrib.auth.views import PasswordResetView
 from django.urls import reverse_lazy
-from django.views.generic import View
+from django.views.generic import View, DetailView, ListView
 from django.views.decorators.csrf import csrf_protect
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.forms import PasswordChangeForm
+from django.http import JsonResponse
 from .models import Artist, Album, Track, Review, UserProfile, SecurityQuestion
 from .forms import (
     ArtistForm, AlbumForm, ReviewForm, CustomLoginForm,
@@ -49,6 +29,7 @@ from .forms import (
 User = get_user_model()
 
 
+# ===== DECORATORS =====
 def admin_required(function=None):
     """Decorator for views that checks if the user is in Admin group."""
     actual_decorator = user_passes_test(
@@ -81,6 +62,82 @@ def can_delete_content(user):
         user.groups.filter(name__in=['Admin', 'Superuser', 'Staff']).exists()
     )
 
+
+# ===== NAVIGATION VIEWS =====
+def artist_detail(request, artist_id):
+    """Display artist details and their albums."""
+    artist = get_object_or_404(Artist, ArtistId=artist_id)
+    albums = Album.objects.filter(ArtistId=artist_id).order_by('Title')
+    
+    # Paginate albums
+    paginator = Paginator(albums, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Get top tracks from artist's albums
+    album_ids = albums.values_list('AlbumId', flat=True)
+    top_tracks = Track.objects.filter(AlbumId__in=album_ids)[:5]
+    
+    return render(request, 'chinook_app/artist_detail.html', {
+        'artist': artist,
+        'albums': page_obj,
+        'top_tracks': top_tracks,
+        'album_count': albums.count()
+    })
+
+
+def album_detail(request, album_id):
+    """Display album details and tracks."""
+    album = get_object_or_404(Album, AlbumId=album_id)
+    tracks = Track.objects.filter(AlbumId=album_id).order_by('TrackId')
+    
+    # Paginate tracks
+    paginator = Paginator(tracks, 15)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Calculate album statistics
+    total_duration = tracks.aggregate(Sum('Milliseconds'))['Milliseconds__sum'] or 0
+    avg_rating = Review.objects.filter(track__AlbumId=album_id).aggregate(Avg('rating'))['rating__avg']
+    
+    # Format duration
+    minutes = total_duration // 60000
+    seconds = (total_duration % 60000) // 1000
+    duration_formatted = f"{minutes}:{seconds:02d}"
+    
+    return render(request, 'chinook_app/album_detail.html', {
+        'album': album,
+        'tracks': page_obj,
+        'total_duration': total_duration,
+        'duration_formatted': duration_formatted,
+        'avg_rating': avg_rating,
+        'track_count': tracks.count()
+    })
+
+
+def artist_albums_detailed(request, artist_id):
+    """Display all albums by artist with enhanced navigation."""
+    artist = get_object_or_404(Artist, ArtistId=artist_id)
+    albums = Album.objects.filter(ArtistId=artist_id).order_by('Title')
+    
+    return render(request, 'chinook_app/artist_albums_detailed.html', {
+        'artist': artist,
+        'albums': albums
+    })
+
+
+def album_tracks_detailed(request, album_id):
+    """Display all tracks in album with enhanced navigation."""
+    album = get_object_or_404(Album, AlbumId=album_id)
+    tracks = Track.objects.filter(AlbumId=album_id).order_by('TrackId')
+    
+    return render(request, 'chinook_app/album_tracks_detailed.html', {
+        'album': album,
+        'tracks': tracks
+    })
+
+
+# ===== CORE VIEWS =====
 @login_required
 def change_password_with_security_questions(request):
     """Handle password change with security question verification."""
@@ -204,65 +261,6 @@ def change_password_with_security_questions(request):
             'show_security_questions': True
         })
 
-# ===== SECURITY QUESTION PASSWORD RESET VIEWS =====
-@method_decorator(csrf_protect, name='dispatch')
-class SecurityQuestionPasswordResetView(View):
-    """Handle password reset using security questions - step 1."""
-
-    template_name = 'account/security_question_reset.html'
-
-    def get(self, request):
-        form = SecurityQuestionResetForm()
-        return render(request, self.template_name, {'form': form})
-
-    def post(self, request):
-        form = SecurityQuestionResetForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data['username']
-            try:
-                user = User.objects.get(username=username)
-                self.request.session['reset_username'] = username
-
-                # Select 2 random questions from user's security questions
-                security_questions = SecurityQuestion.objects.get(user=user)
-                all_questions = [
-                    (security_questions.question_1,
-                     security_questions.answer_1, 1),
-                    (security_questions.question_2,
-                     security_questions.answer_2, 2),
-                    (security_questions.question_3,
-                     security_questions.answer_3, 3),
-                    (security_questions.question_4,
-                     security_questions.answer_4, 4),
-                    (security_questions.question_5,
-                     security_questions.answer_5, 5),
-                ]
-
-                # Randomly select 2 questions
-                selected_questions = random.sample(all_questions, 2)
-
-                # Store questions and answers in session
-                self.request.session['security_questions'] = [
-                    {'question': q[0], 'correct_answer': q[1], 'number': q[2]}
-                    for q in selected_questions
-                ]
-                self.request.session['questions_verified'] = False
-                self.request.session['reset_user_id'] = user.id
-
-                return redirect('security_question_verify')
-
-            except User.DoesNotExist:
-                messages.error(
-                    self.request, 'User not found. Please check the username.'
-                )
-            except SecurityQuestion.DoesNotExist:
-                messages.error(
-                    self.request,
-                    'Security questions not found for this user. '
-                    'Please contact admin.'
-                )
-
-        return render(request, self.template_name, {'form': form})
 
 @login_required
 def setup_security_questions(request):
@@ -319,7 +317,11 @@ def setup_security_questions(request):
 @login_required
 def profile_view(request):
     """Handle user profile updates including security questions."""
-    user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+    except UserProfile.DoesNotExist:
+        user_profile = UserProfile.objects.create(user=request.user)
+    
     has_security_questions = SecurityQuestion.objects.filter(user=request.user).exists()
     
     if request.method == 'POST':
@@ -331,6 +333,21 @@ def profile_view(request):
             email_form = UserEmailForm(instance=request.user)
 
             if profile_form.is_valid():
+                # Validate image if uploaded
+                avatar = request.FILES.get('avatar')
+                if avatar:
+                    # Check file size (2MB limit)
+                    if avatar.size > 2 * 1024 * 1024:
+                        messages.error(request, 'Image size must be less than 2MB')
+                        return redirect('profile')
+                    
+                    # Check file extension
+                    allowed_extensions = ['jpg', 'jpeg', 'png', 'gif']
+                    ext = avatar.name.split('.')[-1].lower()
+                    if ext not in allowed_extensions:
+                        messages.error(request, 'Invalid image format. Use JPG, PNG, or GIF.')
+                        return redirect('profile')
+                
                 profile_form.save()
                 messages.success(
                     request, 'Your profile has been updated successfully!'
@@ -412,243 +429,6 @@ def user_management(request):
     })
 
 
-@login_required
-@staff_required
-def delete_album_frontend(request, album_id):
-    """Front-end album deletion with confirmation."""
-    album = get_object_or_404(Album, AlbumId=album_id)
-
-    if request.method == 'POST':
-        # Check if album has tracks
-        if Track.objects.filter(AlbumId=album_id).exists():
-            messages.error(request, 'Cannot delete album with existing tracks.')
-            return redirect('all_albums')
-
-        album_title = album.Title
-        album.delete()
-        messages.success(request, f'Album "{album_title}" deleted successfully!')
-        return redirect('all_albums')
-
-    return render(request, 'chinook_app/delete_confirm.html', {
-        'object': album
-    })
-
-
-@login_required
-@staff_required
-def delete_artist_frontend(request, artist_id):
-    """Front-end artist deletion with confirmation."""
-    artist = get_object_or_404(Artist, ArtistId=artist_id)
-
-    if request.method == 'POST':
-        # Check if artist has albums
-        if Album.objects.filter(ArtistId=artist_id).exists():
-            messages.error(request, 'Cannot delete artist with existing albums.')
-            return redirect('all_artists')
-
-        artist_name = artist.Name
-        artist.delete()
-        messages.success(request, f'Artist "{artist_name}" deleted successfully!')
-        return redirect('all_artists')
-
-    return render(request, 'chinook_app/delete_confirm.html', {
-        'object': artist
-    })
-
-
-@method_decorator(csrf_protect, name='dispatch')
-class SecurityQuestionVerificationView(View):
-    """Handle password reset using security questions - step 2."""
-
-    template_name = 'account/security_question_verify.html'
-
-    def get(self, request):
-        security_questions = self.request.session.get('security_questions', [])
-        username = self.request.session.get('reset_username')
-
-        if not username or not security_questions:
-            messages.error(
-                self.request, 'Session expired. Please start over.'
-            )
-            return redirect('security_question_reset')
-
-        form = SecurityQuestionVerificationForm(
-            security_questions=security_questions
-        )
-        return render(request, self.template_name, {
-            'form': form,
-            'security_questions': security_questions
-        })
-
-    def post(self, request):
-        security_questions = self.request.session.get('security_questions', [])
-        username = self.request.session.get('reset_username')
-
-        if not username or not security_questions:
-            messages.error(
-                self.request, 'Session expired. Please start over.'
-            )
-            return redirect('security_question_reset')
-
-        form = SecurityQuestionVerificationForm(
-            request.POST, security_questions=security_questions
-        )
-
-        if form.is_valid():
-            try:
-                user = User.objects.get(username=username)
-                correct_answers = 0
-
-                for i, question_data in enumerate(security_questions):
-                    user_answer = form.cleaned_data[
-                        f'answer_{i+1}'
-                    ].lower().strip()
-                    correct_answer = question_data[
-                        'correct_answer'
-                    ].lower().strip()
-
-                    if user_answer == correct_answer:
-                        correct_answers += 1
-
-                # Require both answers to be correct
-                if correct_answers >= 2:
-                    self.request.session['questions_verified'] = True
-                    self.request.session['verified_user_id'] = user.id
-                    messages.success(
-                        self.request,
-                        'Security questions verified successfully! '
-                        'You can now reset your password.'
-                    )
-                    return redirect('password_reset_from_questions')
-                else:
-                    messages.error(
-                        self.request,
-                        'Incorrect answers. Please try again or contact admin.'
-                    )
-
-            except User.DoesNotExist:
-                messages.error(self.request, 'User not found.')
-
-        return render(request, self.template_name, {
-            'form': form,
-            'security_questions': security_questions
-        })
-
-
-@method_decorator(csrf_protect, name='dispatch')
-class QuestionBasedPasswordResetView(View):
-    """Handle password reset using security questions - step 3."""
-
-    template_name = 'account/password_reset_from_questions.html'
-
-    def get(self, request):
-        if not self.request.session.get('questions_verified'):
-            messages.error(
-                self.request, 'Please verify security questions first.'
-            )
-            return redirect('security_question_reset')
-
-        form = SetNewPasswordForm()
-        return render(request, self.template_name, {'form': form})
-
-    def post(self, request):
-        if not self.request.session.get('questions_verified'):
-            messages.error(
-                self.request, 'Please verify security questions first.'
-            )
-            return redirect('security_question_reset')
-
-        user_id = self.request.session.get('verified_user_id')
-        if not user_id:
-            messages.error(
-                self.request, 'Session expired. Please start over.'
-            )
-            return redirect('security_question_reset')
-
-        try:
-            user = User.objects.get(id=user_id)
-            form = SetNewPasswordForm(request.POST)
-
-            if form.is_valid():
-                new_password = form.cleaned_data['new_password']
-                user.set_password(new_password)
-                user.save()
-
-                # Clear session data
-                self._clear_reset_session()
-
-                messages.success(
-                    self.request,
-                    'Your password has been reset successfully! '
-                    'You can now log in with your new password.'
-                )
-                return redirect('account_login')
-
-            return render(request, self.template_name, {'form': form})
-
-        except User.DoesNotExist:
-            messages.error(self.request, 'User not found.')
-            return redirect('security_question_reset')
-
-    def _clear_reset_session(self):
-        """Clear all password reset related session data."""
-        session_keys = [
-            'security_questions',
-            'reset_username',
-            'questions_verified',
-            'verified_user_id',
-            'reset_user_id'
-        ]
-        for key in session_keys:
-            if key in self.request.session:
-                del self.request.session[key]
-
-
-# ===== OVERRIDE ALLAUTH PASSWORD RESET TO REDIRECT TO SECURITY QUESTIONS =====
-class CustomPasswordResetView(PasswordResetView):
-    """Override allauth password reset to redirect to security questions."""
-
-    form_class = CustomResetPasswordForm
-
-    def form_valid(self, form):
-        # Redirect to security question flow instead of sending email
-        username = form.cleaned_data.get(
-            'email'
-        )  # Using email field for username
-        if username:
-            try:
-                user = User.objects.get(username=username)
-                self.request.session['reset_username'] = username
-                return redirect('security_question_reset')
-            except User.DoesNotExist:
-                messages.error(
-                    self.request, 'User not found. Please check the username.'
-                )
-
-        return self.form_invalid(form)
-
-
-@login_required
-def delete_avatar(request):
-    """Handle avatar deletion for user profile."""
-    user_profile = get_object_or_404(UserProfile, user=request.user)
-
-    if request.method == 'POST':
-        if user_profile.avatar:
-            # Delete the avatar file
-            if os.path.isfile(user_profile.avatar.path):
-                os.remove(user_profile.avatar.path)
-            user_profile.avatar.delete(save=True)
-            messages.success(
-                request, 'Your avatar has been deleted successfully!'
-            )
-        return redirect('profile')
-
-    return render(request, 'chinook_app/delete_avatar.html', {
-        'user_profile': user_profile
-    })
-
-
 # ===== CORE APPLICATION VIEWS =====
 def index(request):
     """Homepage view with statistics and recent content."""
@@ -662,7 +442,7 @@ def index(request):
         try:
             recent_albums = Album.objects.select_related(
                 'ArtistId'
-            ).order_by('-AlbumId')[:3]
+            ).order_by('-AlbumId')[:5]
         except:
             recent_albums = []
         
@@ -670,7 +450,7 @@ def index(request):
         try:
             recent_tracks = Track.objects.select_related(
                 'AlbumId', 'AlbumId__ArtistId'
-            ).all()[:15]
+            ).all()[:10]
         except:
             recent_tracks = []
         
@@ -864,7 +644,7 @@ def add_artist(request):
                     artist_name, artist_id
                 )
                 messages.success(request, msg)
-                return redirect('all_artists')
+                return redirect('artist_detail', artist_id=artist_id)
 
             except Exception as e:
                 messages.error(request, f'Error adding artist: {str(e)}')
@@ -897,7 +677,7 @@ def add_album(request):
                 messages.success(
                     request, f'Album "{album_title}" added successfully!'
                 )
-                return redirect('all_albums')
+                return redirect('album_detail', album_id=album_id)
 
             except Exception as e:
                 messages.error(request, f'Error adding album: {str(e)}')
@@ -944,7 +724,7 @@ def update_artist(request):
                         request,
                         f'Artist updated successfully to "{new_name}"!'
                     )
-                    return redirect('all_artists')
+                    return redirect('artist_detail', artist_id=artist_id)
 
                 except Exception as e:
                     messages.error(
@@ -988,7 +768,7 @@ def update_album(request):
                         request,
                         f'Album updated successfully to "{new_title}"!'
                     )
-                    return redirect('all_albums')
+                    return redirect('album_detail', album_id=album_id)
 
                 except Exception as e:
                     messages.error(
@@ -1100,6 +880,50 @@ def delete_album(request):
     })
 
 
+@login_required
+@staff_required
+def delete_album_frontend(request, album_id):
+    """Front-end album deletion with confirmation."""
+    album = get_object_or_404(Album, AlbumId=album_id)
+
+    if request.method == 'POST':
+        # Check if album has tracks
+        if Track.objects.filter(AlbumId=album_id).exists():
+            messages.error(request, 'Cannot delete album with existing tracks.')
+            return redirect('album_detail', album_id=album_id)
+
+        album_title = album.Title
+        album.delete()
+        messages.success(request, f'Album "{album_title}" deleted successfully!')
+        return redirect('all_albums')
+
+    return render(request, 'chinook_app/delete_confirm.html', {
+        'object': album
+    })
+
+
+@login_required
+@staff_required
+def delete_artist_frontend(request, artist_id):
+    """Front-end artist deletion with confirmation."""
+    artist = get_object_or_404(Artist, ArtistId=artist_id)
+
+    if request.method == 'POST':
+        # Check if artist has albums
+        if Album.objects.filter(ArtistId=artist_id).exists():
+            messages.error(request, 'Cannot delete artist with existing albums.')
+            return redirect('artist_detail', artist_id=artist_id)
+
+        artist_name = artist.Name
+        artist.delete()
+        messages.success(request, f'Artist "{artist_name}" deleted successfully!')
+        return redirect('all_artists')
+
+    return render(request, 'chinook_app/delete_confirm.html', {
+        'object': artist
+    })
+
+
 # ===== REVIEW SYSTEM VIEWS =====
 @login_required
 def add_review(request, track_id):
@@ -1204,4 +1028,258 @@ def track_detail(request, track_id):
         'reviews': reviews,
         'user_review': user_review,
         'average_rating': average_rating
+    })
+
+
+# ===== SECURITY QUESTION PASSWORD RESET VIEWS =====
+@method_decorator(csrf_protect, name='dispatch')
+class SecurityQuestionPasswordResetView(View):
+    """Handle password reset using security questions - step 1."""
+
+    template_name = 'account/security_question_reset.html'
+
+    def get(self, request):
+        form = SecurityQuestionResetForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = SecurityQuestionResetForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            try:
+                user = User.objects.get(username=username)
+                self.request.session['reset_username'] = username
+
+                # Select 2 random questions from user's security questions
+                security_questions = SecurityQuestion.objects.get(user=user)
+                all_questions = [
+                    (security_questions.question_1,
+                     security_questions.answer_1, 1),
+                    (security_questions.question_2,
+                     security_questions.answer_2, 2),
+                    (security_questions.question_3,
+                     security_questions.answer_3, 3),
+                    (security_questions.question_4,
+                     security_questions.answer_4, 4),
+                    (security_questions.question_5,
+                     security_questions.answer_5, 5),
+                ]
+
+                # Randomly select 2 questions
+                selected_questions = random.sample(all_questions, 2)
+
+                # Store questions and answers in session
+                self.request.session['security_questions'] = [
+                    {'question': q[0], 'correct_answer': q[1], 'number': q[2]}
+                    for q in selected_questions
+                ]
+                self.request.session['questions_verified'] = False
+                self.request.session['reset_user_id'] = user.id
+
+                return redirect('security_question_verify')
+
+            except User.DoesNotExist:
+                messages.error(
+                    self.request, 'User not found. Please check the username.'
+                )
+            except SecurityQuestion.DoesNotExist:
+                messages.error(
+                    self.request,
+                    'Security questions not found for this user. '
+                    'Please contact admin.'
+                )
+
+        return render(request, self.template_name, {'form': form})
+
+
+@method_decorator(csrf_protect, name='dispatch')
+class SecurityQuestionVerificationView(View):
+    """Handle password reset using security questions - step 2."""
+
+    template_name = 'account/security_question_verify.html'
+
+    def get(self, request):
+        security_questions = self.request.session.get('security_questions', [])
+        username = self.request.session.get('reset_username')
+
+        if not username or not security_questions:
+            messages.error(
+                self.request, 'Session expired. Please start over.'
+            )
+            return redirect('security_question_reset')
+
+        form = SecurityQuestionVerificationForm(
+            security_questions=security_questions
+        )
+        return render(request, self.template_name, {
+            'form': form,
+            'security_questions': security_questions
+        })
+
+    def post(self, request):
+        security_questions = self.request.session.get('security_questions', [])
+        username = self.request.session.get('reset_username')
+
+        if not username or not security_questions:
+            messages.error(
+                self.request, 'Session expired. Please start over.'
+            )
+            return redirect('security_question_reset')
+
+        form = SecurityQuestionVerificationForm(
+            request.POST, security_questions=security_questions
+        )
+
+        if form.is_valid():
+            try:
+                user = User.objects.get(username=username)
+                correct_answers = 0
+
+                for i, question_data in enumerate(security_questions):
+                    user_answer = form.cleaned_data[
+                        f'answer_{i+1}'
+                    ].lower().strip()
+                    correct_answer = question_data[
+                        'correct_answer'
+                    ].lower().strip()
+
+                    if user_answer == correct_answer:
+                        correct_answers += 1
+
+                # Require both answers to be correct
+                if correct_answers >= 2:
+                    self.request.session['questions_verified'] = True
+                    self.request.session['verified_user_id'] = user.id
+                    messages.success(
+                        self.request,
+                        'Security questions verified successfully! '
+                        'You can now reset your password.'
+                    )
+                    return redirect('password_reset_from_questions')
+                else:
+                    messages.error(
+                        self.request,
+                        'Incorrect answers. Please try again or contact admin.'
+                    )
+
+            except User.DoesNotExist:
+                messages.error(self.request, 'User not found.')
+
+        return render(request, self.template_name, {
+            'form': form,
+            'security_questions': security_questions
+        })
+
+
+@method_decorator(csrf_protect, name='dispatch')
+class QuestionBasedPasswordResetView(View):
+    """Handle password reset using security questions - step 3."""
+
+    template_name = 'account/password_reset_from_questions.html'
+
+    def get(self, request):
+        if not self.request.session.get('questions_verified'):
+            messages.error(
+                self.request, 'Please verify security questions first.'
+            )
+            return redirect('security_question_reset')
+
+        form = SetNewPasswordForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        if not self.request.session.get('questions_verified'):
+            messages.error(
+                self.request, 'Please verify security questions first.'
+            )
+            return redirect('security_question_reset')
+
+        user_id = self.request.session.get('verified_user_id')
+        if not user_id:
+            messages.error(
+                self.request, 'Session expired. Please start over.'
+            )
+            return redirect('security_question_reset')
+
+        try:
+            user = User.objects.get(id=user_id)
+            form = SetNewPasswordForm(request.POST)
+
+            if form.is_valid():
+                new_password = form.cleaned_data['new_password']
+                user.set_password(new_password)
+                user.save()
+
+                # Clear session data
+                self._clear_reset_session()
+
+                messages.success(
+                    self.request,
+                    'Your password has been reset successfully! '
+                    'You can now log in with your new password.'
+                )
+                return redirect('account_login')
+
+            return render(request, self.template_name, {'form': form})
+
+        except User.DoesNotExist:
+            messages.error(self.request, 'User not found.')
+            return redirect('security_question_reset')
+
+    def _clear_reset_session(self):
+        """Clear all password reset related session data."""
+        session_keys = [
+            'security_questions',
+            'reset_username',
+            'questions_verified',
+            'verified_user_id',
+            'reset_user_id'
+        ]
+        for key in session_keys:
+            if key in self.request.session:
+                del self.request.session[key]
+
+
+# ===== OVERRIDE ALLAUTH PASSWORD RESET TO REDIRECT TO SECURITY QUESTIONS =====
+class CustomPasswordResetView(PasswordResetView):
+    """Override allauth password reset to redirect to security questions."""
+
+    form_class = CustomResetPasswordForm
+
+    def form_valid(self, form):
+        # Redirect to security question flow instead of sending email
+        username = form.cleaned_data.get(
+            'email'
+        )  # Using email field for username
+        if username:
+            try:
+                user = User.objects.get(username=username)
+                self.request.session['reset_username'] = username
+                return redirect('security_question_reset')
+            except User.DoesNotExist:
+                messages.error(
+                    self.request, 'User not found. Please check the username.'
+                )
+
+        return self.form_invalid(form)
+
+
+@login_required
+def delete_avatar(request):
+    """Handle avatar deletion for user profile."""
+    user_profile = get_object_or_404(UserProfile, user=request.user)
+
+    if request.method == 'POST':
+        if user_profile.avatar:
+            # Delete the avatar file
+            if os.path.isfile(user_profile.avatar.path):
+                os.remove(user_profile.avatar.path)
+            user_profile.avatar.delete(save=True)
+            messages.success(
+                request, 'Your avatar has been deleted successfully!'
+            )
+        return redirect('profile')
+
+    return render(request, 'chinook_app/delete_avatar.html', {
+        'user_profile': user_profile
     })
