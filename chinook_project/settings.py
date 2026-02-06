@@ -61,8 +61,10 @@ ROOT_URLCONF = 'chinook_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
+        'DIRS': [
+            BASE_DIR / 'templates',  # Project-level templates
+        ],
+        'APP_DIRS': True,  # Enable app-level templates
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -119,8 +121,10 @@ USE_TZ = True
 
 # ===== STATIC FILES =====
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',  # Development static files
+]
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # Production static files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ===== MEDIA FILES =====
@@ -167,3 +171,33 @@ else:
 # ===== CUSTOM SETTINGS =====
 SITE_NAME = "Chinook Music Database"
 SITE_DESCRIPTION = "Explore and manage your music collection"
+
+# ===== ERROR HANDLING =====
+# Show debug error pages in development, custom pages in production
+DEBUG_PROPAGATE_EXCEPTIONS = False
+
+# Custom error pages configuration
+if not DEBUG:
+    # Logging configuration for production
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'file': {
+                'level': 'ERROR',
+                'class': 'logging.FileHandler',
+                'filename': BASE_DIR / 'errors.log',
+            },
+            'console': {
+                'level': 'ERROR',
+                'class': 'logging.StreamHandler',
+            },
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['file', 'console'],
+                'level': 'ERROR',
+                'propagate': True,
+            },
+        },
+    }

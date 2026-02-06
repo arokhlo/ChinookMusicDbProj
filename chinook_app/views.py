@@ -1,3 +1,6 @@
+"""
+Views for the Chinook Music Database application.
+"""
 import os
 import random
 from django.shortcuts import render, redirect, get_object_or_404
@@ -12,7 +15,7 @@ from django.contrib.auth import (
 )
 from django.contrib.auth.views import PasswordResetView
 from django.urls import reverse_lazy
-from django.views.generic import View, DetailView, ListView
+from django.views.generic import View
 from django.views.decorators.csrf import csrf_protect
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import user_passes_test
@@ -27,6 +30,27 @@ from .forms import (
 )
 
 User = get_user_model()
+
+
+# ===== ERROR HANDLER VIEWS =====
+def custom_400(request, exception=None):
+    """Custom 400 error page."""
+    return render(request, '400.html', status=400)
+
+
+def custom_403(request, exception=None):
+    """Custom 403 error page."""
+    return render(request, '403.html', status=403)
+
+
+def custom_404(request, exception=None):
+    """Custom 404 error page."""
+    return render(request, '404.html', status=404)
+
+
+def custom_500(request):
+    """Custom 500 error page."""
+    return render(request, '500.html', status=500)
 
 
 # ===== DECORATORS =====
