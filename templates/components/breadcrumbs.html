@@ -1,0 +1,69 @@
+<!-- Breadcrumb Navigation Component -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb bg-light p-3 rounded">
+        <li class="breadcrumb-item">
+            <a href="{% url 'home' %}" class="text-decoration-none">
+                <i class="fas fa-home text-primary"></i>
+                <span class="ms-1">Home</span>
+            </a>
+        </li>
+        
+        {% if artist %}
+            <li class="breadcrumb-item">
+                <a href="{% url 'all_artists' %}" class="text-decoration-none">
+                    <i class="fas fa-users text-primary"></i>
+                    <span class="ms-1">Artists</span>
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <i class="fas fa-user text-warning"></i>
+                <span class="ms-1">{{ artist.Name }}</span>
+            </li>
+        {% elif album %}
+            <li class="breadcrumb-item">
+                <a href="{% url 'all_artists' %}" class="text-decoration-none">
+                    <i class="fas fa-users text-primary"></i>
+                    <span class="ms-1">Artists</span>
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'artist_detail' album.ArtistId.ArtistId %}" class="text-decoration-none">
+                    <i class="fas fa-user text-primary"></i>
+                    <span class="ms-1">{{ album.ArtistId.Name }}</span>
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <i class="fas fa-compact-disc text-warning"></i>
+                <span class="ms-1">{{ album.Title }}</span>
+            </li>
+        {% elif track %}
+            <li class="breadcrumb-item">
+                <a href="{% url 'all_artists' %}" class="text-decoration-none">
+                    <i class="fas fa-users text-primary"></i>
+                    <span class="ms-1">Artists</span>
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'artist_detail' track.album.ArtistId.ArtistId %}" class="text-decoration-none">
+                    <i class="fas fa-user text-primary"></i>
+                    <span class="ms-1">{{ track.album.ArtistId.Name }}</span>
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'album_detail' track.AlbumId.AlbumId %}" class="text-decoration-none">
+                    <i class="fas fa-compact-disc text-primary"></i>
+                    <span class="ms-1">{{ track.AlbumId.Title }}</span>
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <i class="fas fa-music text-warning"></i>
+                <span class="ms-1">{{ track.Name }}</span>
+            </li>
+        {% else %}
+            <li class="breadcrumb-item active" aria-current="page">
+                <i class="fas fa-{{ icon|default:'list' }} text-warning"></i>
+                <span class="ms-1">{{ page_title|default:title }}</span>
+            </li>
+        {% endif %}
+    </ol>
+</nav>
