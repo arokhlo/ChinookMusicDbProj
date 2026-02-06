@@ -1,3 +1,10 @@
-DEBUG=False
-SECRET_KEY=django-insecure-chinook-secret-key-2024
-DATABASE_URL=postgresql://neondb_owner:npg_FgsZR9MWb8Sr@ep-long-dust-aggdj4tj.c-2.eu-central-1.aws.neon.tech/alive_smell_rank_585650
+# Django Settings
+DJANGO_SECRET_KEY=your-secure-secret-key-here
+DJANGO_DEBUG=True
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+
+# Database (SQLite for development)
+DATABASE_URL=sqlite:///db.sqlite3
+
+# Email Configuration (Development)
+EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend

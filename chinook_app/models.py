@@ -1,4 +1,5 @@
 import os
+import uuid
 from django.db import models
 from django.contrib.auth.models import User, Group
 from django.db.models.signals import post_save
@@ -7,6 +8,8 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from django.core.validators import FileExtensionValidator
+from django.core.exceptions import ValidationError
 
 
 class SecurityQuestion(models.Model):
@@ -62,17 +65,35 @@ class SecurityQuestion(models.Model):
         return question_value
 
 
+def validate_image_size(value):
+    """Validate that image size is under 2MB."""
+    limit = 2 * 1024 * 1024  # 2MB
+    if value.size > limit:
+        raise ValidationError('Image size must be less than 2MB.')
+
+
 def user_avatar_path(instance, filename):
-    """Generate file path for user avatar upload."""
+    """Generate unique file path for user avatar upload."""
+    # Generate unique filename
+    ext = filename.split('.')[-1]
+    unique_filename = f"avatar_{instance.user.id}_{uuid.uuid4().hex[:8]}.{ext}"
+    
     # File will be uploaded to MEDIA_ROOT/avatars/user_<id>/<filename>
-    return f'avatars/user_{instance.user.id}/{filename}'
+    return f'avatars/user_{instance.user.id}/{unique_filename}'
 
 
 class UserProfile(models.Model):
     """Extended user profile information."""
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.ImageField(
-        upload_to=user_avatar_path, blank=True, null=True
+        upload_to=user_avatar_path,
+        blank=True,
+        null=True,
+        validators=[
+            FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'gif']),
+            validate_image_size
+        ],
+        help_text="Upload a profile picture. Max size: 2MB"
     )
     bio = models.TextField(max_length=500, blank=True)
     location = models.CharField(max_length=30, blank=True)
@@ -91,7 +112,19 @@ class UserProfile(models.Model):
                         os.remove(old.avatar.path)
             except UserProfile.DoesNotExist:
                 pass
+        
+        # Ensure avatar directory exists
+        if self.avatar:
+            avatar_dir = os.path.dirname(self.avatar.path)
+            os.makedirs(avatar_dir, exist_ok=True)
+            
         super().save(*args, **kwargs)
+
+    def avatar_url(self):
+        """Return avatar URL or default."""
+        if self.avatar and hasattr(self.avatar, 'url'):
+            return self.avatar.url
+        return '/static/images/default-avatar.png'
 
 
 @receiver(post_save, sender=User)
@@ -142,7 +175,9 @@ def send_admin_registration_notification(new_user):
 
     except Exception as e:
         # Log the error but don't break user registration
-        print(f"Error sending admin notification: {e}")
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error sending admin notification: {e}")
 
 
 class Artist(models.Model):
@@ -153,9 +188,18 @@ class Artist(models.Model):
     class Meta:
         db_table = 'Artist'
         managed = True
+        ordering = ['Name']
 
     def __str__(self):
         return self.Name
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('artist_detail', args=[str(self.ArtistId)])
+
+    def album_count(self):
+        """Return number of albums by this artist."""
+        return self.album_set.count()
 
 
 class Album(models.Model):
@@ -169,9 +213,24 @@ class Album(models.Model):
     class Meta:
         db_table = 'Album'
         managed = False
+        ordering = ['Title']
 
     def __str__(self):
         return self.Title
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('album_detail', args=[str(self.AlbumId)])
+
+    def track_count(self):
+        """Return number of tracks in this album."""
+        return self.track_set.count()
+
+    def duration(self):
+        """Return total duration of all tracks in milliseconds."""
+        from django.db.models import Sum
+        total = self.track_set.aggregate(Sum('Milliseconds'))['Milliseconds__sum']
+        return total or 0
 
 
 class Track(models.Model):
@@ -192,15 +251,26 @@ class Track(models.Model):
     class Meta:
         db_table = 'Track'
         managed = False
+        ordering = ['TrackId']
 
     def __str__(self):
         return self.Name
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('track_detail', args=[str(self.TrackId)])
 
     def duration_formatted(self):
         """Format milliseconds to MM:SS format."""
         minutes = self.Milliseconds // 60000
         seconds = (self.Milliseconds % 60000) // 1000
         return f"{minutes}:{seconds:02d}"
+
+    def artist(self):
+        """Get artist from album."""
+        if self.AlbumId and self.AlbumId.ArtistId:
+            return self.AlbumId.ArtistId
+        return None
 
 
 class Review(models.Model):
@@ -222,8 +292,13 @@ class Review(models.Model):
 
     class Meta:
         unique_together = ['user', 'track']
+        ordering = ['-created_at']
 
     def __str__(self):
         username = self.user.username
         track_name = self.track.Name
         return f"{username} - {track_name} - {self.rating} stars"
+
+    def get_rating_display(self):
+        """Get star representation of rating."""
+        return '★' * self.rating
