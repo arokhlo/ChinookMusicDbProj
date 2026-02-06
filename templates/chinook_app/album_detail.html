@@ -318,9 +318,9 @@
                             <a href="{% url 'search_track' %}" class="btn btn-outline-success">
                                 <i class="fas fa-search me-2"></i>Search Tracks
                             </a>
-                            {% if user.is_authenticated %}
-                                <a href="{% url 'add_review' track.TrackId %}" class="btn btn-outline-warning">
-                                    <i class="fas fa-star me-2"></i>Add Review
+                            {% if user.is_authenticated and tracks %}
+                                <a href="{% url 'add_review' tracks.0.TrackId %}" class="btn btn-outline-warning">
+                                    <i class="fas fa-star me-2"></i>Review First Track
                                 </a>
                             {% endif %}
                         </div>
