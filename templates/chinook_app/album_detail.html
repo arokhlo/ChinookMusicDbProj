@@ -5,7 +5,32 @@
 
 {% block content %}
 <!-- Breadcrumb Navigation -->
-{% include 'components/breadcrumbs.html' with artist=album.ArtistId album=album %}
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb bg-light p-3 rounded">
+        <li class="breadcrumb-item">
+            <a href="{% url 'home' %}" class="text-decoration-none">
+                <i class="fas fa-home text-primary"></i>
+                <span class="ms-1">Home</span>
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'all_artists' %}" class="text-decoration-none">
+                <i class="fas fa-users text-primary"></i>
+                <span class="ms-1">Artists</span>
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'artist_detail' album.ArtistId.ArtistId %}" class="text-decoration-none">
+                <i class="fas fa-user text-primary"></i>
+                <span class="ms-1">{{ album.ArtistId.Name }}</span>
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="fas fa-compact-disc text-warning"></i>
+            <span class="ms-1">{{ album.Title }}</span>
+        </li>
+    </ol>
+</nav>
 
 <div class="container">
     <!-- Album Header -->
@@ -294,7 +319,7 @@
                                 <i class="fas fa-search me-2"></i>Search Tracks
                             </a>
                             {% if user.is_authenticated %}
-                                <a href="{% url 'add_review' track_id %}" class="btn btn-outline-warning">
+                                <a href="{% url 'add_review' track.TrackId %}" class="btn btn-outline-warning">
                                     <i class="fas fa-star me-2"></i>Add Review
                                 </a>
                             {% endif %}

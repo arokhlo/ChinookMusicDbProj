@@ -62,9 +62,9 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            BASE_DIR / 'templates',  # Project-level templates
+            BASE_DIR / 'templates',  # Project-level templates (for error pages, base.html)
         ],
-        'APP_DIRS': True,  # Enable app-level templates
+        'APP_DIRS': True,  # Enable app-level templates (chinook_app/templates/)
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -72,6 +72,9 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'chinook_app.context_processors.site_settings',
+            ],
+            'builtins': [
+                'django.templatetags.static',  # Auto-load static tag
             ],
         },
     },
@@ -94,6 +97,9 @@ else:
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
+            'OPTIONS': {
+                'timeout': 20,  # Increase timeout for better concurrency
+            }
         }
     }
 
@@ -104,6 +110,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -151,6 +160,8 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_LOGOUT_ON_GET = True
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+ACCOUNT_SESSION_REMEMBER = True  # Remember login sessions
+ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True  # Password confirmation
 
 # ===== CRISPY FORMS CONFIGURATION =====
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
@@ -159,6 +170,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 # ===== EMAIL CONFIGURATION =====
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    EMAIL_FILE_PATH = BASE_DIR / 'emails'  # Directory for file-based emails
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
@@ -168,36 +180,170 @@ else:
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
     DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@chinookmusic.com')
 
+# ===== SESSION CONFIGURATION =====
+# Fix for "Session data corrupted" warnings
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Default database sessions
+SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds (default)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Keep session after browser closes
+SESSION_SAVE_EVERY_REQUEST = True  # Save session on every request
+SESSION_COOKIE_NAME = 'chinook_sessionid'  # Custom session cookie name
+SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
+SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection
+
+# Clear corrupted sessions on startup (in development only)
+if DEBUG and os.path.exists(BASE_DIR / 'db.sqlite3'):
+    try:
+        from django.contrib.sessions.models import Session
+        from django.utils import timezone
+        # Delete expired sessions
+        Session.objects.filter(expire_date__lt=timezone.now()).delete()
+        print("Cleaned up expired sessions on startup")
+    except Exception as e:
+        print(f"Could not clean sessions: {e}")
+
+# ===== CACHE CONFIGURATION =====
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+# ===== FILE UPLOAD CONFIGURATION =====
+FILE_UPLOAD_MAX_MEMORY_SIZE = 2 * 1024 * 1024  # 2MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000  # Maximum number of form fields
+
+# Avatar upload configuration
+AVATAR_MAX_SIZE = 2 * 1024 * 1024  # 2MB
+AVATAR_ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif']
+
 # ===== CUSTOM SETTINGS =====
 SITE_NAME = "Chinook Music Database"
 SITE_DESCRIPTION = "Explore and manage your music collection"
+SITE_URL = "http://localhost:8000" if DEBUG else os.environ.get('SITE_URL', 'https://chinookmusic.com')
 
-# ===== ERROR HANDLING =====
-# Show debug error pages in development, custom pages in production
-DEBUG_PROPAGATE_EXCEPTIONS = False
-
-# Custom error pages configuration
-if not DEBUG:
-    # Logging configuration for production
+# ===== ERROR HANDLING & LOGGING =====
+if DEBUG:
+    # Show detailed error pages in development
+    DEBUG_PROPAGATE_EXCEPTIONS = True
+    
     LOGGING = {
         'version': 1,
         'disable_existing_loggers': False,
+        'formatters': {
+            'verbose': {
+                'format': '{levelname} {asctime} {module} {message}',
+                'style': '{',
+            },
+            'simple': {
+                'format': '{levelname} {message}',
+                'style': '{',
+            },
+        },
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'simple',
+            },
+            'file': {
+                'class': 'logging.FileHandler',
+                'filename': BASE_DIR / 'debug.log',
+                'formatter': 'verbose',
+            },
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['console', 'file'],
+                'level': 'INFO',
+                'propagate': True,
+            },
+            'chinook_app': {
+                'handlers': ['console', 'file'],
+                'level': 'DEBUG' if DEBUG else 'INFO',
+                'propagate': False,
+            },
+        },
+    }
+else:
+    # Production error handling
+    DEBUG_PROPAGATE_EXCEPTIONS = False
+    
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'verbose': {
+                'format': '{levelname} {asctime} {module} {message}',
+                'style': '{',
+            },
+        },
         'handlers': {
             'file': {
                 'level': 'ERROR',
                 'class': 'logging.FileHandler',
                 'filename': BASE_DIR / 'errors.log',
+                'formatter': 'verbose',
             },
-            'console': {
+            'mail_admins': {
                 'level': 'ERROR',
-                'class': 'logging.StreamHandler',
+                'class': 'django.utils.log.AdminEmailHandler',
+                'include_html': True,
             },
         },
         'loggers': {
             'django': {
-                'handlers': ['file', 'console'],
+                'handlers': ['file', 'mail_admins'],
                 'level': 'ERROR',
                 'propagate': True,
             },
         },
     }
+
+# ===== SECURITY HEADERS (Production) =====
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_REFERRER_POLICY = 'same-origin'
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# ===== PERFORMANCE OPTIMIZATIONS =====
+# Database connection persistence
+if 'postgresql' in DATABASES['default'].get('ENGINE', ''):
+    DATABASES['default']['CONN_MAX_AGE'] = 60  # 1 minute connection persistence
+
+# Static file compression
+WHITENOISE_MANIFEST_STRICT = False  # Allow missing files in manifest
+
+# Template caching in production
+if not DEBUG:
+    TEMPLATES[0]['OPTIONS']['loaders'] = [
+        ('django.template.loaders.cached.Loader', [
+            'django.template.loaders.filesystem.Loader',
+            'django.template.loaders.app_directories.Loader',
+        ]),
+    ]
+
+# ===== DJANGO DEBUG TOOLBAR (Development Only) =====
+if DEBUG:
+    try:
+        import debug_toolbar
+        INSTALLED_APPS += ['debug_toolbar']
+        MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
+        INTERNAL_IPS = ['127.0.0.1', 'localhost']
+        
+        # Debug toolbar configuration
+        DEBUG_TOOLBAR_CONFIG = {
+            'SHOW_TOOLBAR_CALLBACK': lambda request: True,
+            'SHOW_TEMPLATE_CONTEXT': True,
+        }
+    except ImportError:
+        pass  # Debug toolbar not installed, skip it
+
+# ===== FINAL SETUP CHECKS =====
+# Create required directories
+for directory in [STATIC_ROOT, MEDIA_ROOT, BASE_DIR / 'templates', BASE_DIR / 'emails']:
+    os.makedirs(directory, exist_ok=True)
+
+print(f"✅ Settings loaded: DEBUG={DEBUG}, ALLOWED_HOSTS={ALLOWED_HOSTS}")

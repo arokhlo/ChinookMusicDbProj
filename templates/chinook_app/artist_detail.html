@@ -5,7 +5,26 @@
 
 {% block content %}
 <!-- Breadcrumb Navigation -->
-{% include 'components/breadcrumbs.html' with current_item=artist %}
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb bg-light p-3 rounded">
+        <li class="breadcrumb-item">
+            <a href="{% url 'home' %}" class="text-decoration-none">
+                <i class="fas fa-home text-primary"></i>
+                <span class="ms-1">Home</span>
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'all_artists' %}" class="text-decoration-none">
+                <i class="fas fa-users text-primary"></i>
+                <span class="ms-1">Artists</span>
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="fas fa-user text-warning"></i>
+            <span class="ms-1">{{ artist.Name }}</span>
+        </li>
+    </ol>
+</nav>
 
 <div class="container">
     <!-- Artist Header -->
@@ -19,7 +38,7 @@
                         <div class="col-md-4">
                             <div class="card bg-primary text-white">
                                 <div class="card-body text-center">
-                                    <h2 class="mb-0">{{ artist.album_count }}</h2>
+                                    <h2 class="mb-0">{{ album_count }}</h2>
                                     <p class="mb-0">Albums</p>
                                 </div>
                             </div>
@@ -27,7 +46,7 @@
                         <div class="col-md-4">
                             <div class="card bg-success text-white">
                                 <div class="card-body text-center">
-                                    <h2 class="mb-0">{% if albums %}{{ albums.paginator.count }}{% else %}0{% endif %}</h2>
+                                    <h2 class="mb-0">{{ albums.paginator.count }}</h2>
                                     <p class="mb-0">Total Tracks</p>
                                 </div>
                             </div>
@@ -145,8 +164,8 @@
                                     <div class="card-footer bg-transparent border-top">
                                         <small class="text-muted">
                                             <i class="fas fa-clock me-1"></i>
-                                            {% if album.duration %}
-                                                {{ album.duration|floatformat:0 }} tracks
+                                            {% if album.track_count %}
+                                                {{ album.track_count }} tracks
                                             {% else %}
                                                 0 tracks
                                             {% endif %}
