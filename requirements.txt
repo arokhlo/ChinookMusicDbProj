@@ -24,3 +24,6 @@ pillow==10.1.0
 
 # Development
 python-decouple==3.8
+
+# Error Reporting (Optional)
+sentry-sdk==1.35.0  # For production error tracking
