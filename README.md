@@ -15,21 +15,34 @@
 The **Chinook Music Database** is a Django-based web application that enables users, administrators, and store owners to manage artists, albums, tracks, and playlists with full CRUD functionality. Built with Django, PostgreSQL, and Bootstrap, it offers secure authentication, advanced search, and a responsive, music-themed interface. Developed using agile methodology, it focuses on user-centered design, efficient data management, and accessibility across all devices.
 
 ---
-<p align="center"><img src="/static/images/home.png" alt="Home Page Screenshot"></p>
-<h2 align="center"><a href="https://chinookmusicdbpro-1a8fd737fe52.herokuapp.com/">Website Link</a> | <a href="https://github.com/users/arokhlo/projects/11/views/1">Project Board</a></h2>
+<p align="center">
+  <img src="/static/images/home.png" alt="Home Page Screenshot">
+</p>
 
-## 🧭 Table of Contents
-- [User Stories](#user-stories)
+<h2 align="center">
+  <a href="https://chinookmusicdbpro-1a8fd737fe52.herokuapp.com/">Website Link</a> | 
+  <a href="https://github.com/users/arokhlo/projects/11/views/1">Project Board</a>
+</h2>
+
+---
+
+## 📑 Table of Contents
 - [UX Design](#ux-design)
-- [Features](#features)
-- [Technology Stack](#technology-stack)
-- [Agile Development](#agile-development)
+- [Project Criteria Compliance](#project-criteria-compliance)
+- [Agile Methodology Implementation](#agile-methodology-implementation)
+- [CRUD Functionality Matrix](#crud-functionality-matrix)
 - [Database Models](#database-models)
+- [User Stories](#user-stories)
+- [Advanced Features](#advanced-features)
+- [Project Success Metrics](#project-success-metrics)
 - [Testing & Validation](#testing--validation)
 - [Installation & Setup](#installation--setup)
-- [Deployment](#deployment)
+- [Deployment to Heroku](#deployment-to-heroku)
 - [AI Implementation](#ai-implementation)
 - [Credits](#credits)
+- [Support](#support)
+- [License](#license)
+- [Changelog](#changelog)
 
 ---
 
@@ -249,29 +262,10 @@ The final design balances aesthetics with functionality, using Bootstrap 5 compo
 
 ---
 
-## 🔄 Agile Development
-
-### Project Management
-- **GitHub Projects Board:** Comprehensive task management with MoSCoW prioritization
-- **Sprint Cycles:** 2-week sprints with defined goals and deliverables
-- **User Stories:** 93% completion rate (14/15 stories implemented)
-
-<br>
-<img src="/static/images/projectboard.png" alt="GitHub Project Board Screenshot">
-<a href="https://github.com/users/arokhlo/projects/11/views/1">Project Board</a>
-<br>
-
-### Epics & Milestones
-- **User Authentication & Security:** Secure login, registration, and password recovery
-- **Music Catalog Management:** Browse, search, and filter functionality
-- **CRUD Operations:** Full create, read, update, delete functionality
-- **User Experience & Design:** Responsive design and intuitive interface
-
----
-
 ## ✅ Testing & Validation
 
 ### Manual Testing
+
 | Feature | Test Case | Result | Notes |
 |---------|-----------|--------|-------|
 | User Registration | New user can sign up | ✅ PASS | Security questions working |
@@ -301,32 +295,32 @@ python manage.py test accounts.tests.test_views
 #### Python Validation
 All Python files comply with PEP8 standards with comprehensive documentation:
 
-**Admin:**
+**Admin:**  
 <img src="/static/images/py/admin-PyValidation.png" alt="Admin Python Validation">
 
-**Models:**
+**Models:**  
 <img src="/static/images/py/models-PyValidation.png" alt="Models Python Validation">
 
-**URLs:**
+**URLs:**  
 <img src="/static/images/py/urls-PyValidation.png" alt="URLs Python Validation">
 
-**Forms:**
+**Forms:**  
 <img src="/static/images/py/forms-PyValidation.png" alt="Forms Python Validation">
 
 #### HTML Validation
 All HTML templates validated with W3C Validator with zero errors:
 
-**Base Template:**
+**Base Template:**  
 <img src="/static/images/base-Validation.png" alt="Base HTML Validation">
 
-**Home Page:**
+**Home Page:**  
 <img src="/static/images/index-Validation.png" alt="Home HTML Validation">
 
-**Profile Page:**
+**Profile Page:**  
 <img src="/static/images/profile-Validation.png" alt="Profile HTML Validation">
 
 #### CSS Validation
-Custom stylesheets validated with W3C CSS Validator:
+Custom stylesheets validated with W3C CSS Validator:  
 <img src="/static/images/css.png" alt="CSS Validation">
 
 #### Lighthouse Performance
@@ -597,7 +591,9 @@ AI tools served as effective learning aids by:
 
 ### 🙏 Acknowledgments
 I would like to extend my sincere gratitude to the developer community for their invaluable resources and documentation. Special thanks to the contributors behind Django and PostgreSQL, whose foundational work made this project possible.
+
 I am also grateful to **Code Institute** for their support during the Full Stack Developer Bootcamp, and for the positive guidance I received throughout my learning journey.
+
 This project builds upon the classic Chinook database schema, enhanced with modern web application features and custom improvements.
 
 ---
@@ -626,3 +622,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - PostgreSQL database integration
 - Heroku deployment configuration
 
+---
+
+*Last Updated: February 2024*
