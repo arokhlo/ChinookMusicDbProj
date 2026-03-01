@@ -1,0 +1,21 @@
+chinookmusicdbpro
+
+
+
+$ heroku config:get DATABASE_URL --app chinookmusicdbpro
+postgres://uaunrqs0brbp4j:p4d6614fac3b909a639528c680d19d97b2712d4a142fb7da937bc90cfa7ed7952@c4pml560q9pviv.cluster-czz5s0kz4scl.eu-west-1.rds.amazonaws.com:5432/dfrt6cj3lil6f
+
+
+$ heroku config:get DATABASE_URL --app chinookmusicdbpro
+postgres://uaunrqs0brbp4j:p4d6614fac3b909a639528c680d19d97b2712d4a142fb7da937bc90cfa7ed7952@c4pml560q9pviv.cluster-czz5s0kz4scl.eu-west-1.rds.amazonaws.com:5432/dfrt6cj3lil6f
+
+
+
+
+Username	uaunrqs0brbp4j
+
+Password	p4d6614fac3b909a639528c680d19d97b2712d4a142fb7da937bc90cfa7ed7952
+
+Port	5432 (default PostgreSQL port)
+Database Name	dfrt6cj3lil6f
+

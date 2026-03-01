@@ -1,16 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -23,22 +10,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ===== SECURITY SETTINGS =====
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-dev-key-change-in-production')
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = [
-    'localhost', 
-    '127.0.0.1',
-    'polar-everglades-85341-97bf20655618.herokuapp.com',  # Your current Heroku app URL
-    '.herokuapp.com'  # This will match any Heroku app domain
-]
-
-
-
-
-
-
-
-
-
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+# If you want to use environment variables (recommended):
+import os
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,.herokuapp.com').split(',')
 
 # Security settings for production
 if not DEBUG:
@@ -116,7 +91,7 @@ if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
     # Parse PostgreSQL URL for Heroku
     import dj_database_url
     DATABASES = {
-        'default': dj_database_url.config(default=DATABASE_URL)
+    'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
     }
 else:
     # Default to SQLite for development
