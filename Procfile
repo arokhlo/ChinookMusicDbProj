@@ -1,1 +1,1 @@
-gunicorn chinook_project.wsgi:application
+web: gunicorn chinook_project.wsgi --log-file -
