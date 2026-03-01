@@ -1,3 +1,16 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -11,7 +24,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ===== SECURITY SETTINGS =====
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-dev-key-change-in-production')
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = [
+    'localhost', 
+    '127.0.0.1',
+    'polar-everglades-85341-97bf20655618.herokuapp.com',  # Your current Heroku app URL
+    '.herokuapp.com'  # This will match any Heroku app domain
+]
+
+
+
+
+
+
+
+
+
 
 # Security settings for production
 if not DEBUG:
