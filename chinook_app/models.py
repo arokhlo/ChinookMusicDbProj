@@ -187,7 +187,7 @@ class Artist(models.Model):
 
     class Meta:
         db_table = 'Artist'
-        managed = True
+        managed = False
         ordering = ['Name']
 
     def __str__(self):
