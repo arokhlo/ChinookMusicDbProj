@@ -59,14 +59,13 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'chinook_project.urls'
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            BASE_DIR / 'templates',  # Project-level templates (for error pages, base.html)
+            BASE_DIR / 'templates',  # Project-level templates
         ],
-        'APP_DIRS': not DEBUG,  # Enable app-level templates (chinook_app/templates/)
+        'APP_DIRS': True,  # This is sufficient for both development and production
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -76,22 +75,11 @@ TEMPLATES = [
                 'chinook_app.context_processors.site_settings',
             ],
             'builtins': [
-                'django.templatetags.static',  # Auto-load static tag
+                'django.templatetags.static',
             ],
         },
     },
 ]
-
-# Add loaders only in production
-if not DEBUG:
-    TEMPLATES[0]['OPTIONS']['loaders'] = [
-        ('django.template.loaders.cached.Loader', [
-            'django.template.loaders.filesystem.Loader',
-            'django.template.loaders.app_directories.Loader',
-        ]),
-    ]
-    # Must set APP_DIRS to False when using loaders
-    TEMPLATES[0]['APP_DIRS'] = False
 
 WSGI_APPLICATION = 'chinook_project.wsgi.application'
 
