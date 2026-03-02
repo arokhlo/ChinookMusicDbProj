@@ -1,3 +1,20 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -61,12 +78,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'chinook_project.wsgi.application'
 
-# دیتابیس
 import dj_database_url
 DATABASE_URL = os.environ.get('DATABASE_URL')
-if DATABASE_URL:
+
+
+
+if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
     DATABASES = {
-        'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600, ssl_require=True)
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True
+        )
     }
 else:
     DATABASES = {
