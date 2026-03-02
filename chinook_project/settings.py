@@ -11,8 +11,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ===== SECURITY SETTINGS =====
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-dev-key-change-in-production')
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
-# If you want to use environment variables (recommended):
-import os
+
+# UPDATED: ALLOWED_HOSTS using environment variable with Heroku support
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,.herokuapp.com').split(',')
 
 # Security settings for production
@@ -85,16 +85,26 @@ TEMPLATES = [
 WSGI_APPLICATION = 'chinook_project.wsgi.application'
 
 # ===== DATABASE CONFIGURATION =====
+# UPDATED: Simplified database configuration with proper Heroku support
+import dj_database_url
+
+# Default database URL from environment or SQLite fallback
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
-if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
-    # Parse PostgreSQL URL for Heroku
-    import dj_database_url
+if DATABASE_URL:
+    # Use the provided DATABASE_URL (Heroku or custom)
     DATABASES = {
-    'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True
+        )
     }
+    # Force SSL for PostgreSQL on Heroku
+    if DATABASES['default']['ENGINE'] == 'django.db.backends.postgresql':
+        DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
 else:
-    # Default to SQLite for development
+    # Default to SQLite for local development
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -183,25 +193,13 @@ else:
     DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@chinookmusic.com')
 
 # ===== SESSION CONFIGURATION =====
-# Fix for "Session data corrupted" warnings
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Default database sessions
-SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds (default)
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Keep session after browser closes
-SESSION_SAVE_EVERY_REQUEST = True  # Save session on every request
-SESSION_COOKIE_NAME = 'chinook_sessionid'  # Custom session cookie name
-SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
-SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection
-
-# Clear corrupted sessions on startup (in development only)
-if DEBUG and os.path.exists(BASE_DIR / 'db.sqlite3'):
-    try:
-        from django.contrib.sessions.models import Session
-        from django.utils import timezone
-        # Delete expired sessions
-        Session.objects.filter(expire_date__lt=timezone.now()).delete()
-        print("Cleaned up expired sessions on startup")
-    except Exception as e:
-        print(f"Could not clean sessions: {e}")
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 1209600  # 2 weeks
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_NAME = 'chinook_sessionid'
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
 
 # ===== CACHE CONFIGURATION =====
 CACHES = {
@@ -214,20 +212,17 @@ CACHES = {
 # ===== FILE UPLOAD CONFIGURATION =====
 FILE_UPLOAD_MAX_MEMORY_SIZE = 2 * 1024 * 1024  # 2MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
-DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000  # Maximum number of form fields
-
-# Avatar upload configuration
-AVATAR_MAX_SIZE = 2 * 1024 * 1024  # 2MB
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
+AVATAR_MAX_SIZE = 2 * 1024 * 1024
 AVATAR_ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif']
 
 # ===== CUSTOM SETTINGS =====
 SITE_NAME = "Chinook Music Database"
 SITE_DESCRIPTION = "Explore and manage your music collection"
-SITE_URL = "http://localhost:8000" if DEBUG else os.environ.get('SITE_URL', 'https://chinookmusic.com')
+SITE_URL = "http://localhost:8000" if DEBUG else os.environ.get('SITE_URL', 'https://chinookmusicdbpro-9cf6a74ba2e3.herokuapp.com')
 
 # ===== ERROR HANDLING & LOGGING =====
 if DEBUG:
-    # Show detailed error pages in development
     DEBUG_PROPAGATE_EXCEPTIONS = True
     
     LOGGING = {
@@ -268,7 +263,6 @@ if DEBUG:
         },
     }
 else:
-    # Production error handling
     DEBUG_PROPAGATE_EXCEPTIONS = False
     
     LOGGING = {
@@ -304,21 +298,18 @@ else:
 
 # ===== SECURITY HEADERS (Production) =====
 if not DEBUG:
-    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_REFERRER_POLICY = 'same-origin'
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # ===== PERFORMANCE OPTIMIZATIONS =====
-# Database connection persistence
 if 'postgresql' in DATABASES['default'].get('ENGINE', ''):
-    DATABASES['default']['CONN_MAX_AGE'] = 60  # 1 minute connection persistence
+    DATABASES['default']['CONN_MAX_AGE'] = 60
 
-# Static file compression
-WHITENOISE_MANIFEST_STRICT = False  # Allow missing files in manifest
+WHITENOISE_MANIFEST_STRICT = False
 
-# Template caching in production
 if not DEBUG:
     TEMPLATES[0]['OPTIONS']['loaders'] = [
         ('django.template.loaders.cached.Loader', [
@@ -335,16 +326,14 @@ if DEBUG:
         MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
         INTERNAL_IPS = ['127.0.0.1', 'localhost']
         
-        # Debug toolbar configuration
         DEBUG_TOOLBAR_CONFIG = {
             'SHOW_TOOLBAR_CALLBACK': lambda request: True,
             'SHOW_TEMPLATE_CONTEXT': True,
         }
     except ImportError:
-        pass  # Debug toolbar not installed, skip it
+        pass
 
 # ===== FINAL SETUP CHECKS =====
-# Create required directories
 for directory in [STATIC_ROOT, MEDIA_ROOT, BASE_DIR / 'templates', BASE_DIR / 'emails']:
     os.makedirs(directory, exist_ok=True)
 
