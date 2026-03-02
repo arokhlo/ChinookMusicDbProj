@@ -66,7 +66,7 @@ TEMPLATES = [
         'DIRS': [
             BASE_DIR / 'templates',  # Project-level templates (for error pages, base.html)
         ],
-        'APP_DIRS': True,  # Enable app-level templates (chinook_app/templates/)
+        'APP_DIRS': not DEBUG,  # Enable app-level templates (chinook_app/templates/)
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -81,6 +81,17 @@ TEMPLATES = [
         },
     },
 ]
+
+# Add loaders only in production
+if not DEBUG:
+    TEMPLATES[0]['OPTIONS']['loaders'] = [
+        ('django.template.loaders.cached.Loader', [
+            'django.template.loaders.filesystem.Loader',
+            'django.template.loaders.app_directories.Loader',
+        ]),
+    ]
+    # Must set APP_DIRS to False when using loaders
+    TEMPLATES[0]['APP_DIRS'] = False
 
 WSGI_APPLICATION = 'chinook_project.wsgi.application'
 
