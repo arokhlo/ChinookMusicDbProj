@@ -1,262 +1,46 @@
-{% load static %}
-<!DOCTYPE html>
-<html class="h-100" lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{% block description %}Chinook Music Database - Explore and manage music collection{% endblock %}">
-    <title>{{ SITE_NAME }} - {% block title %}Home{% endblock %}</title>
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    
-    {% block extra_css %}{% endblock %}
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
-</head>
-<body class="d-flex flex-column h-100">
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);">
-        <div class="container">
-            <a class="navbar-brand fw-bold text-white" href="{% url 'home' %}" style="font-size: 1.4rem;">
-                <i class="fas fa-music me-2" aria-hidden="true"></i>🎵 {{ SITE_NAME }}
+<!-- Simplified Management Menu - No custom tags needed -->
+{% if user.is_authenticated %}
+    {% if user.is_superuser %}
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-white fw-semibold" href="#" 
+               id="managementDropdown" role="button" data-bs-toggle="dropdown" 
+               aria-expanded="false">
+                <i class="fas fa-cog me-1"></i>Manage
             </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
-                    data-bs-target="#navbarNav" aria-controls="navbarNav" 
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link text-white fw-semibold {% if request.path == '/' %}active border-bottom border-warning{% endif %}" 
-                           href="{% url 'home' %}">
-                            <i class="fas fa-home me-1" aria-hidden="true"></i>Home
-                        </a>
-                    </li>
-                    
-                    <!-- Music Navigation -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-white fw-semibold" href="#" role="button" 
-                           data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-music me-1" aria-hidden="true"></i>Music
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'all_artists' %}">
-                                <i class="fas fa-users me-2"></i>Artists
-                            </a></li>
-                            <li><a class="dropdown-item" href="{% url 'all_albums' %}">
-                                <i class="fas fa-compact-disc me-2"></i>Albums
-                            </a></li>
-                            <li><a class="dropdown-item" href="{% url 'search_track' %}">
-                                <i class="fas fa-search me-2"></i>Search Tracks
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'search_artist' %}">
-                                <i class="fas fa-search me-2"></i>Search Artist
-                            </a></li>
-                            <li><a class="dropdown-item" href="{% url 'search_album' %}">
-                                <i class="fas fa-search me-2"></i>Search Album
-                            </a></li>
-                        </ul>
-                    </li>
-                    
-                    <!-- Add Content (Authenticated Users) -->
-                    {% if user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-white fw-semibold" href="#" role="button" 
-                           data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-plus me-1" aria-hidden="true"></i>Add
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'add_artist' %}">
-                                <i class="fas fa-user-plus me-2"></i>Add Artist
-                            </a></li>
-                            <li><a class="dropdown-item" href="{% url 'add_album' %}">
-                                <i class="fas fa-compact-disc me-2"></i>Add Album
-                            </a></li>
-                        </ul>
-                    </li>
-                    {% endif %}
-                    
-                    <!-- Management (Admin/Superuser/Staff) -->
-                    {% if user.is_authenticated and user.groups.all %}
-                        {% with user_groups=user.groups.all %}
-                            {% for group in user_groups %}
-                                {% if group.name == 'Admin' or group.name == 'Superuser' or group.name == 'Staff' %}
-                                    <li class="nav-item dropdown">
-                                        <a class="nav-link dropdown-toggle text-white fw-semibold" href="#" 
-                                           id="managementDropdown" role="button" data-bs-toggle="dropdown" 
-                                           aria-expanded="false">
-                                            <i class="fas fa-cog me-1" aria-hidden="true"></i>Manage
-                                        </a>
-                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="managementDropdown">
-                                            {% if group.name == 'Admin' %}
-                                            <li>
-                                                <a class="dropdown-item" href="{% url 'user_management' %}">
-                                                    <i class="fas fa-users-cog me-2"></i>User Management
-                                                </a>
-                                            </li>
-                                            {% endif %}
-                                            <li>
-                                                <a class="dropdown-item" href="{% url 'admin:index' %}">
-                                                    <i class="fas fa-tools me-2"></i>Admin Panel
-                                                </a>
-                                            </li>
-                                            <li><hr class="dropdown-divider"></li>
-                                            <li><span class="dropdown-header">Content Management</span></li>
-                                            <li>
-                                                <a class="dropdown-item" href="{% url 'update_artist' %}">
-                                                    <i class="fas fa-edit me-2"></i>Update Artist
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item" href="{% url 'update_album' %}">
-                                                    <i class="fas fa-edit me-2"></i>Update Album
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item text-danger" href="{% url 'delete_artist' %}">
-                                                    <i class="fas fa-trash me-2"></i>Delete Artist
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item text-danger" href="{% url 'delete_album' %}">
-                                                    <i class="fas fa-trash me-2"></i>Delete Album
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                {% endif %}
-                            {% endfor %}
-                        {% endwith %}
-                    {% endif %}
-                </ul>
-                
-                <!-- User Account Section -->
-                <ul class="navbar-nav ms-auto">
-                    {% if user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-white fw-semibold" href="#" id="userDropdown" 
-                           role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            {% if user.userprofile.avatar %}
-                                <img src="{{ user.userprofile.avatar.url }}" 
-                                     alt="{{ user.username }}'s avatar" 
-                                     class="rounded-circle me-2 avatar-sm"
-                                     style="width: 30px; height: 30px; object-fit: cover;"
-                                     onerror="this.src='{% static 'images/default-avatar.png' %}'">
-                            {% else %}
-                                <i class="fas fa-user-circle me-2" aria-hidden="true"></i>
-                            {% endif %}
-                            {{ user.username }}
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li>
-                                <a class="dropdown-item" href="{% url 'profile' %}">
-                                    <i class="fas fa-id-card me-2"></i>Profile
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="{% url 'setup_security_questions' %}">
-                                    <i class="fas fa-shield-alt me-2"></i>Security Questions
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="{% url 'change_password_with_security' %}">
-                                    <i class="fas fa-key me-2"></i>Change Password
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a class="dropdown-item" href="{% url 'account_logout' %}">
-                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link text-white fw-semibold" href="{% url 'account_login' %}">
-                            <i class="fas fa-sign-in-alt me-1"></i>Login
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white fw-semibold" href="{% url 'account_signup' %}">
-                            <i class="fas fa-user-plus me-1"></i>Sign Up
-                        </a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Messages -->
-    <div class="container mt-2">
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                <i class="fas 
-                    {% if message.tags == 'success' %}fa-check-circle
-                    {% elif message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle
-                    {% elif message.tags == 'warning' %}fa-exclamation-triangle
-                    {% else %}fa-info-circle{% endif %} me-2" aria-hidden="true">
-                </i>
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    </div>
-
-    <!-- Main Content -->
-    <main class="flex-shrink-0">
-        <div class="container mt-2">
-            {% block content %}
-            <!-- Content goes here -->
-            {% endblock %}
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer mt-auto py-3 bg-dark text-light">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <p class="mb-2">
-                        <i class="fas fa-music me-2"></i>{{ SITE_NAME }}
-                    </p>
-                    <p class="mb-0 small">{{ SITE_DESCRIPTION }}</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p class="mb-2">
-                        &copy; {% now "Y" %} Chinook Music Database. All rights reserved.
-                    </p>
-                    <p class="mb-0">
-                        <a href="{% url 'home' %}" class="text-light me-3">Home</a>
-                        <a href="{% url 'all_artists' %}" class="text-light me-3">Artists</a>
-                        <a href="{% url 'all_albums' %}" class="text-light me-3">Albums</a>
-                        {% if user.is_authenticated %}
-                            <a href="{% url 'profile' %}" class="text-light">Profile</a>
-                        {% else %}
-                            <a href="{% url 'account_login' %}" class="text-light">Login</a>
-                        {% endif %}
-                    </p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JS -->
-    <script src="{% static 'js/script.js' %}"></script>
-    
-    {% block extra_js %}{% endblock %}
-</body>
-</html>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item" href="{% url 'user_management' %}">
+                        <i class="fas fa-users-cog me-2"></i>User Management
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'admin:index' %}">
+                        <i class="fas fa-tools me-2"></i>Admin Panel
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li><span class="dropdown-header">Content Management</span></li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'update_artist' %}">
+                        <i class="fas fa-edit me-2"></i>Update Artist
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'update_album' %}">
+                        <i class="fas fa-edit me-2"></i>Update Album
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item text-danger" href="{% url 'delete_artist' %}">
+                        <i class="fas fa-trash me-2"></i>Delete Artist
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item text-danger" href="{% url 'delete_album' %}">
+                        <i class="fas fa-trash me-2"></i>Delete Album
+                    </a>
+                </li>
+            </ul>
+        </li>
+    {% endif %}
+{% endif %}
