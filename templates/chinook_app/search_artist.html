@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Search Artist{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Search Artist</h2>
+        
+        <form method="post" class="mb-4">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="search_term">Enter artist name to search:</label>
+                <input type="text" id="search_term" name="search_term" value="{{ search_term }}" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+
+        {% if artists is not None %}
+            <h3>Search Results for '{{ search_term }}' ({{ artists|length }} found)</h3>
+            
+            {% if artists %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Artist Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for artist in artists %}
+                            <tr>
+                                <td>{{ artist.ArtistId }}</td>
+                                <td>{{ artist.Name }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-warning">
+                    No artists found matching '{{ search_term }}'.
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

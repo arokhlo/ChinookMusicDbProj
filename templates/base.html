@@ -1,0 +1,46 @@
+<!-- Simplified Management Menu - No custom tags needed -->
+{% if user.is_authenticated %}
+    {% if user.is_superuser %}
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-white fw-semibold" href="#" 
+               id="managementDropdown" role="button" data-bs-toggle="dropdown" 
+               aria-expanded="false">
+                <i class="fas fa-cog me-1"></i>Manage
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item" href="{% url 'user_management' %}">
+                        <i class="fas fa-users-cog me-2"></i>User Management
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'admin:index' %}">
+                        <i class="fas fa-tools me-2"></i>Admin Panel
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li><span class="dropdown-header">Content Management</span></li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'update_artist' %}">
+                        <i class="fas fa-edit me-2"></i>Update Artist
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'update_album' %}">
+                        <i class="fas fa-edit me-2"></i>Update Album
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item text-danger" href="{% url 'delete_artist' %}">
+                        <i class="fas fa-trash me-2"></i>Delete Artist
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item text-danger" href="{% url 'delete_album' %}">
+                        <i class="fas fa-trash me-2"></i>Delete Album
+                    </a>
+                </li>
+            </ul>
+        </li>
+    {% endif %}
+{% endif %}

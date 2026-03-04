@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Artist{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h2>Delete Artist</h2>
+        
+        {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+        {% endif %}
+        
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="artist_id" class="form-label">Select Artist to Delete:</label>
+                        <select id="artist_id" name="artist_id" class="form-control" required>
+                            <option value="">-- Select an Artist --</option>
+                            {% for artist in artists %}
+                            <option value="{{ artist.ArtistId }}" {% if selected_artist and selected_artist.ArtistId == artist.ArtistId %}selected{% endif %}>
+                                {{ artist.Name }} (ID: {{ artist.ArtistId }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <button type="submit" name="select_artist" class="btn btn-primary">Select Artist</button>
+                </form>
+
+                {% if selected_artist %}
+                <hr>
+                <div class="alert alert-warning">
+                    <h5>⚠️ Warning: This action cannot be undone!</h5>
+                    <p>You are about to delete: <strong>{{ selected_artist.Name }}</strong></p>
+                    <p><strong>Artist ID:</strong> {{ selected_artist.ArtistId }}</p>
+                    
+                    {% if not error %}
+                    <form method="post" onsubmit="return confirm('Are you sure you want to delete {{ selected_artist.Name }}? This action cannot be undone.');">
+                        {% csrf_token %}
+                        <input type="hidden" name="artist_id" value="{{ selected_artist.ArtistId }}">
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" name="delete_artist" class="btn btn-danger">Delete Artist</button>
+                            <a href="{% url 'delete_artist' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
